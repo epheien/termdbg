@@ -40,3 +40,7 @@ call s:InitVariable('g:termdbg_pdb3_prog',  'pdb3')
 call s:InitVariable('g:termdbg_ipdb_prog',  'ipdb')
 call s:InitVariable('g:termdbg_ipdb3_prog', 'ipdb3')
 ```
+
+## Screenshots
+
+![termdbg](https://ws3.sinaimg.cn/large/006tNc79gy1g02vid3jvij30u00ucdq1.jpg)
