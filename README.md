@@ -1,13 +1,14 @@
 # termdbg
-Termdbg is a terminal debugger plugin for vim 8.1 and later.
 
-Currently, termdbg support pdb and ipdb, if you need gdb support, try termdebug (`:h termdebug`)
+Termdbg is a terminal debugger plugin for vim 8.1 and later.  
+Currently, termdbg only supports pdb and ipdb, if you need gdb support, try termdebug (`:h termdebug`)
 
 Currently, termdbg just only do these things:
 - locate cursor to current runing line when debugger
 - simply toggle breakpoints in buffer
 
 ## Install
+
 > Need vim 8.1 and later and compiled with +terminal feature.
 
 For vim-plug
@@ -22,9 +23,11 @@ For manual installation
   (usually `~/.vim`).
 
 ## Usage
+
 Run `TermdbgPdb {pyfile}`
 
 ## Commands
+
 - `:TNext` Step over
 - `:TStep` Step in
 - `:TFinish` Return from current function
@@ -34,6 +37,7 @@ Run `TermdbgPdb {pyfile}`
 
 
 ## Options
+
 ```viml
 call s:InitVariable('g:termdbg_pdb_prog',   'pdb')
 call s:InitVariable('g:termdbg_pdb3_prog',  'pdb3')
