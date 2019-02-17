@@ -13,7 +13,42 @@ if exists('s:loaded')
 endif
 let s:loaded = 1
 
-let s:os = g:vlutils#os
+func! s:splitdrive(p)
+  if a:p[1:1] ==# ':'
+    return [a:p[0:1], a:p[2:]]
+  endif
+  return ['', a:p]
+endfunc
+
+func! s:isabs(s)
+  if has('unix')
+    return a:s =~# '^/'
+  else
+    let s = s:splitdrive(a:s)[1]
+    return s !=# '' && s[0:0] =~# '/\|\\'
+  endif
+endfunc
+
+func! s:GetCmdOutput(sCmd)
+    let bak_lang = v:lang
+
+    " 把消息统一为英文
+    exec ":lan mes en_US.UTF-8"
+
+    try
+        redir => sOutput
+        silent! exec a:sCmd
+    catch
+        " 把错误消息设置为最后的 ':' 后的字符串?
+        "let v:errmsg = substitute(v:exception, '^[^:]\+:', '', '')
+    finally
+        redir END
+    endtry
+
+    exec ":lan mes " . bak_lang
+
+    return sOutput
+endfunc
 
 let s:pc_id = 1002
 let s:break_id = 1003
@@ -284,7 +319,7 @@ func s:_LocateCursor(msg)
       let lnum = str2nr(matches[2])
     endif
   endif
-  if empty(fname) || !s:os.path.isabs(fname)
+  if empty(fname) || !s:isabs(fname)
     return 0
   endif
 
@@ -412,7 +447,7 @@ func s:ToggleBreak()
   "     line=16  id=1006  name=TermdbgBreak
   "     line=16  id=1005  name=TermdbgBreak
   let found = 0
-  let li = split(vlutils#GetCmdOutput('sign place buffer=' . bufnr('%')), "\n")
+  let li = split(s:GetCmdOutput('sign place buffer=' . bufnr('%')), "\n")
   for line in li[2:]
     let fields = split(line)
     if len(fields) != 3
