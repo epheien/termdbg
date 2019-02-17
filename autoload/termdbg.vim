@@ -54,7 +54,6 @@ let s:pc_id = 1002
 let s:break_id = 1003
 let s:winbar_winids = []
 let s:cache_lines = []
-let g:cache_lines = s:cache_lines
 let s:dbg_type = ''
 let s:prompt = '(Pdb) '
 let s:breakpoints = {}
@@ -139,7 +138,7 @@ function s:out_cb(chan, msg)
   for idx in range(len(lines))
     " 去除 ipdb 的转义字符以及指令行的多余的空格
     if s:dbg_type ==# 'ipdb'
-      let lines[idx] = g:TrimAnsiEscape(lines[idx])
+      let lines[idx] = s:TrimAnsiEscape(lines[idx])
       if lines[idx] =~# '^\V' . s:prompt
         let lines[idx] = s:prompt
       endif
@@ -349,7 +348,7 @@ func s:_LocateCursor(msg)
   return 1
 endfunc
 
-function g:LocateCursor()
+function s:LocateCursor()
   if !exists('s:ptybuf')
     return
   endif
@@ -379,7 +378,7 @@ func s:InstallCommands()
   command TStep call s:TermdbgStep()
   command TFinish call s:TermdbgFinish()
   command TContinue call s:TermdbgContinue()
-  command TLocateCursor call g:LocateCursor()
+  command TLocateCursor call s:LocateCursor()
   command TBreakpoint call s:SetBreakpoint()
   command TClearBreak call s:ClearBreakpoint()
   command TToggleBreak call s:ToggleBreak()
@@ -418,7 +417,7 @@ func s:SendCommand(cmd)
   call term_sendkeys(s:ptybuf, a:cmd . "\r")
 endfunc
 
-func g:TrimAnsiEscape(msg)
+func s:TrimAnsiEscape(msg)
   let pat = '\C\v(%x9B|%x1B\[)[0-?]*[ -/]*[@-~]'
   return substitute(a:msg, pat, '', 'g')
 endfunc
