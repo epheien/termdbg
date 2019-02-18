@@ -19,7 +19,7 @@ Plug 'epheien/termdbg'
 
 For manual installation
 
-- Extract the files and put them in your .vim directory
+- Extract the files and put them in your .vim directory  
   (usually `~/.vim`).
 
 ## Usage
