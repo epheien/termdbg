@@ -449,7 +449,8 @@ func s:ToggleBreak()
   let li = split(s:GetCmdOutput('sign place buffer=' . bufnr('%')), "\n")
   for line in li[2:]
     let fields = split(line)
-    if len(fields) != 3
+    " vim 8.1 之后，增加了 priority 字段，所以分隔后，字段数可能为 4
+    if len(fields) < 3
       continue
     endif
     let lnum = matchstr(fields[0], '\d\+$')
