@@ -79,7 +79,10 @@ call s:InitVariable('g:termdbg_pdb_prog',   'pdb')
 call s:InitVariable('g:termdbg_pdb3_prog',  'pdb3')
 call s:InitVariable('g:termdbg_ipdb_prog',  'ipdb')
 call s:InitVariable('g:termdbg_ipdb3_prog', 'ipdb3')
+" 启动时是否使用 shell
+call s:InitVariable('g:termdbg_use_shell', 0)
 
+" (bang, type, *argv)
 function termdbg#StartDebug(bang, type, ...)
   if exists('s:dbgwin')
     echoerr 'Terminal debugger is already running'
@@ -93,7 +96,13 @@ function termdbg#StartDebug(bang, type, ...)
   let s:startwin = win_getid(winnr())
   let s:startsigncolumn = &signcolumn
 
-  let s:ptybuf = term_start(a:000, {
+  let argv = copy(a:000)
+  " 使用 shell 来运行调试器的话，可以避免一些奇怪问题，主要是环境变量问题
+  if g:termdbg_use_shell
+    let argv = [&shell, &shellcmdflag] + [join(map(argv, {idx, val -> shellescape(val)}), ' ')]
+  endif
+
+  let s:ptybuf = term_start(argv, {
         \ 'term_name': 'Terminal debugger',
         \ 'out_cb': function('s:out_cb'),
         \ 'err_cb': function('s:err_cb'),
