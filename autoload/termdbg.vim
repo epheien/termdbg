@@ -141,6 +141,10 @@ function termdbg#StartDebug(bang, type, ...)
   call win_gotoid(s:ptybuf)
 endfunction
 
+" 只要在终端窗口一定时间内（n毫秒）有连续的输出，就会进入此回调
+" 不保证 msg 是一整行
+" 因为绝大多数程序的标准输出是行缓冲的，所以一般情况下（手动输入除外），
+" msg 是成整行的，可能是多个整行
 function s:out_cb(chan, msg)
   "echomsg string(a:msg)
   let lines = split(a:msg, "\r")
