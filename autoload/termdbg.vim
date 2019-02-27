@@ -56,6 +56,7 @@ let s:winbar_winids = []
 let s:cache_lines = []
 let s:dbg_type = ''
 let s:prompt = '(Pdb) '
+" {bpnr: {lnum: ..., file: ...}, ...}
 let s:breakpoints = {}
 
 if &background == 'light'
@@ -446,6 +447,34 @@ func s:ClearBreakpoint()
   endfor
 endfunc
 
+" 仅列出当前缓冲区的标号
+func termdbg#sign_getplaced() abort
+  let result = []
+  let li = split(s:GetCmdOutput('sign place buffer=' . bufnr('%')), "\n")
+  for line in li[2:]
+    let fields = split(line)
+    " vim 8.1 之后，增加了 priority 字段，所以分隔后，字段数可能为 4
+    if len(fields) < 3
+      continue
+    endif
+    let entry = {}
+    for field in fields
+      let ret = matchlist(field, '\(^\w\+\)=\(.\+\)$')
+      let key = ret[1]
+      let val = ret[2]
+      if key ==# 'line' || key ==# 'id' || key ==# 'priority'
+        let entry[key] = str2nr(val)
+      else
+        let entry[key] = val
+      endif
+    endfor
+    " 输出的是 line，后面标准化的时候是 lnum
+    let entry['lnum'] = get(entry, 'line', 0)
+    call add(result, entry)
+  endfor
+  return result
+endfunc
+
 func s:ToggleBreak()
   " --- Signs ---
   " Signs for /Users/eph/a.py:
@@ -455,18 +484,12 @@ func s:ToggleBreak()
   "     line=16  id=1006  name=TermdbgBreak
   "     line=16  id=1005  name=TermdbgBreak
   let found = 0
-  let li = split(s:GetCmdOutput('sign place buffer=' . bufnr('%')), "\n")
-  for line in li[2:]
-    let fields = split(line)
-    " vim 8.1 之后，增加了 priority 字段，所以分隔后，字段数可能为 4
-    if len(fields) < 3
-      continue
+  let li = termdbg#sign_getplaced()
+  for entry in li
+    if get(entry, 'name') ==# 'TermdbgBreak' && get(entry, 'lnum', 0) is line('.')
+      let found = 1
+      break
     endif
-    let lnum = matchstr(fields[0], '\d\+$')
-    if lnum != line('.')
-      continue
-    endif
-    let found = 1
   endfor
   if found
     call s:ClearBreakpoint()
