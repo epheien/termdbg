@@ -105,7 +105,7 @@ function termdbg#StartDebug(bang, type, ...)
 
   let s:ptybuf = term_start(argv, {
         \ 'term_name': 'Terminal debugger',
-        \ 'out_cb': function('s:out_cb'),
+        \ 'out_cb': function('termdbg#out_cb'),
         \ 'err_cb': function('s:err_cb'),
         \ 'exit_cb': function('s:exit_cb'),
         \ 'term_finish': 'close',
@@ -145,15 +145,20 @@ endfunction
 " 不保证 msg 是一整行
 " 因为绝大多数程序的标准输出是行缓冲的，所以一般情况下（手动输入除外），
 " msg 是成整行的，可能是多个整行
-function s:out_cb(chan, msg)
+" BUG: 虽然 msg 每次过来基本可以确定是整行的，但是行之间的顺序是不定的！
+function termdbg#out_cb(chan, msg)
   "echomsg string(a:msg)
-  let lines = split(a:msg, "\r")
+  if s:dbg_type ==# 'ipdb'
+    " 去除 ipdb 的转义字符
+    let lines = split(s:TrimAnsiEscape(a:msg), "\r")
+  else
+    let lines = split(a:msg, "\r")
+  endif
 
   for idx in range(len(lines))
-    " 去除 ipdb 的转义字符以及指令行的多余的空格
     if s:dbg_type ==# 'ipdb'
-      let lines[idx] = s:TrimAnsiEscape(lines[idx])
-      if lines[idx] =~# '^\V' . s:prompt
+      " ipdb 的指令行会有多余的空格
+      if lines[idx] =~# '^\V' . s:prompt . '\s\+\$'
         let lines[idx] = s:prompt
       endif
     endif
@@ -173,30 +178,19 @@ function s:out_cb(chan, msg)
     let s:cache_lines = s:cache_lines[-100:-1]
   endif
 
-  if !empty(lines) && lines[-1] =~# '\V' . s:prompt . '\$'
-    let pdb_cnt = 0
-    for idx in range(len(s:cache_lines)-1, 0, -1)
-      let line = s:cache_lines[idx]
-      if line ==# s:prompt
-        let pdb_cnt += 1
-        if pdb_cnt >= 2
-          break
-        endif
+  " 无脑逐行匹配动作！
+  for line in reverse(lines)
+    if line =~# '^> '
+      " 光标定位
+      if !s:_LocateCursor(line)
+        execute 'sign unplace' s:pc_id
       endif
-
-      if line =~# '^> '
-        " 光标定位
-        if !s:_LocateCursor(line)
-          execute 'sign unplace' s:pc_id
-        endif
-        break
-      elseif line =~# '^Breakpoint \d\+ at '
-        call s:HandleNewBreakpoint(line)
-      elseif line =~# '^Deleted breakpoint \d\+ at '
-        call s:HandleDelBreakpoint(line)
-      endif
-    endfor
-  endif
+    elseif line =~# '^Breakpoint \d\+ at '
+      call s:HandleNewBreakpoint(line)
+    elseif line =~# '^Deleted breakpoint \d\+ at '
+      call s:HandleDelBreakpoint(line)
+    endif
+  endfor
 endfunction
 
 " Breakpoint 1 at /Users/eph/a.py:16
