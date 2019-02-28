@@ -54,6 +54,8 @@ let s:pc_id = 1002
 let s:break_id = 1003
 let s:winbar_winids = []
 let s:cache_lines = []
+" for debug
+let termdbg#cache_lines = s:cache_lines
 let s:dbg_type = ''
 let s:prompt = '(Pdb) '
 " {bpnr: {lnum: ..., file: ...}, ...}
@@ -156,13 +158,6 @@ function termdbg#out_cb(chan, msg)
   endif
 
   for idx in range(len(lines))
-    if s:dbg_type ==# 'ipdb'
-      " ipdb 的指令行会有多余的空格
-      if lines[idx] =~# '^\V' . s:prompt . '\s\+\$'
-        let lines[idx] = s:prompt
-      endif
-    endif
-
     " 去除 "^\n"
     let lines[idx] = substitute(lines[idx], '^\n', '', '')
   endfor
@@ -175,7 +170,7 @@ function termdbg#out_cb(chan, msg)
 
   call extend(s:cache_lines, lines)
   if len(s:cache_lines) > 100
-    let s:cache_lines = s:cache_lines[-100:-1]
+    call filter(s:cache_lines, {idx, val -> idx >= len(s:cache_lines) - 100})
   endif
 
   " 无脑逐行匹配动作！
