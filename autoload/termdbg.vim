@@ -12,7 +12,6 @@ if exists('s:loaded')
   finish
 endif
 let s:loaded = 1
-let s:job = job#get()
 let s:job_id = 0
 let s:ptybuf = 0
 let s:dbgwin = 0
@@ -304,7 +303,7 @@ endfunc
 
 " Install the window toolbar in the current window.
 func s:InstallWinbar()
-  if has('menu') && &mouse != ''
+  if !has('nvim') && has('menu') && &mouse != ''
     nnoremenu <silent> WinBar.Break  :call <SID>ToggleBreak()<CR>
     nnoremenu <silent> WinBar.Next   :TNext<CR>
     nnoremenu <silent> WinBar.Step   :TStep<CR>
