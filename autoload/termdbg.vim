@@ -12,6 +12,10 @@ if exists('s:loaded')
   finish
 endif
 let s:loaded = 1
+let s:job = job#get()
+let s:job_id = 0
+let s:ptybuf = 0
+let s:dbgwin = 0
 
 func! s:splitdrive(p)
   if a:p[1:1] ==# ':'
@@ -87,7 +91,7 @@ call s:InitVariable('g:termdbg_use_shell', 0)
 
 " (bang, type, *argv)
 function termdbg#StartDebug(bang, type, ...)
-  if exists('s:dbgwin')
+  if s:dbgwin > 0
     echoerr 'Terminal debugger is already running'
     return
   endif
@@ -105,13 +109,24 @@ function termdbg#StartDebug(bang, type, ...)
     let argv = [&shell, &shellcmdflag] + [join(map(argv, {idx, val -> shellescape(val)}), ' ')]
   endif
 
-  let s:ptybuf = term_start(argv, {
-        \ 'term_name': 'Terminal debugger',
-        \ 'out_cb': function('termdbg#out_cb'),
-        \ 'err_cb': function('s:err_cb'),
-        \ 'exit_cb': function('s:exit_cb'),
-        \ 'term_finish': 'close',
-        \ })
+  if has('nvim')
+    let callbacks = {
+      \ 'on_stdout': function('s:on_event'),
+      \ 'on_stderr': function('s:on_event'),
+      \ 'on_exit': function('s:on_event')
+      \ }
+    new 'Terminal debugger'
+    let s:ptybuf = bufnr('%')
+    let s:job_id = termopen(argv, extend({}, callbacks))
+  else
+    let s:ptybuf = term_start(argv, {
+          \ 'term_name': 'Terminal debugger',
+          \ 'out_cb': function('termdbg#on_stdout'),
+          \ 'err_cb': function('s:on_stderr'),
+          \ 'exit_cb': function('s:on_exit'),
+          \ 'term_finish': 'close',
+          \ })
+  endif
   let s:dbgwin = win_getid(winnr())
 
   call s:InstallCommands()
@@ -148,7 +163,7 @@ endfunction
 " 因为绝大多数程序的标准输出是行缓冲的，所以一般情况下（手动输入除外），
 " msg 是成整行的，可能是多个整行
 " BUG: 虽然 msg 每次过来基本可以确定是整行的，但是行之间的顺序是不定的！
-function termdbg#out_cb(chan, msg)
+function termdbg#on_stdout(job_id, msg)
   "echomsg string(a:msg)
   if s:dbg_type ==# 'ipdb'
     " 去除 ipdb 的转义字符
@@ -236,12 +251,23 @@ func s:PlaceSign(bpnr, entry)
   let a:entry['placed'] = 1
 endfunc
 
-function s:err_cb(chan, msg)
+func s:on_event(job_id, data, event) dict abort
+  if a:event == 'stdout'
+    call termdbg#on_stdout(a:job_id, join(a:data, "\n"))
+  elseif a:event == 'stderr'
+    call s:on_stderr(a:job_id, join(a:data, "\n"))
+  else " 'exit'
+    call s:on_exit(a:job_id, a:data)
+  endif
+endfunc
+
+function s:on_stderr(job_id, data)
 endfunction
 
-function s:exit_cb(job, status)
+function s:on_exit(job_id, status)
   execute 'bwipe!' s:ptybuf
-  unlet s:dbgwin
+  let s:ptybuf = 0
+  let s:dbgwin = 0
   call filter(s:cache_lines, 0)
 
   let curwinid = win_getid(winnr())
@@ -352,7 +378,7 @@ func s:_LocateCursor(msg)
 endfunc
 
 function s:LocateCursor()
-  if !exists('s:ptybuf')
+  if s:ptybuf <= 0
     return
   endif
   let maxlnum = s:getbufmaxline(s:ptybuf)
@@ -417,7 +443,13 @@ func s:DeleteWinbar()
 endfunc
 
 func s:SendCommand(cmd)
-  call term_sendkeys(s:ptybuf, a:cmd . "\r")
+  if has('nvim')
+    if s:job_id > 0
+      call jobsend(s:job_id, a:cmd . "\r")
+    endif
+  else
+    call term_sendkeys(s:ptybuf, a:cmd . "\r")
+  endif
 endfunc
 
 func s:TrimAnsiEscape(msg)

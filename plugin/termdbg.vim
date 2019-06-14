@@ -4,15 +4,10 @@
 " Create:       2019-02-11
 " Change:       2019-02-11
 
-" not support
-if has('nvim')
-  finish
-endif
-
-if !has('terminal')
-  echohl WarningMsg
-  echomsg 'termdbg need compliled with +terminal'
-  echohl None
+if !has('nvim') && !has('terminal')
+  "echohl WarningMsg
+  "echomsg 'termdbg need compliled with +terminal'
+  "echohl None
   finish
 endif
 
