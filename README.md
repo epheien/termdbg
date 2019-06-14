@@ -1,6 +1,6 @@
 # termdbg
 
-Termdbg is a terminal debugger plugin for vim 8.1 and later.  
+Termdbg is a terminal debugger plugin for vim 8.1+ and neovim 0.3.6+.  
 Currently, termdbg only supports pdb, if you need gdb support, try termdebug (`:h termdebug`)
 
 Currently, termdbg just only do these things:
@@ -9,7 +9,7 @@ Currently, termdbg just only do these things:
 
 ## Install
 
-> Need vim 8.1 and later and compiled with +terminal feature.
+> Need vim 8.1+ (+terminal) and neovim 0.3.6+.
 
 For vim-plug
 
@@ -39,8 +39,10 @@ Run `TermdbgPdb {pyfile}`
 ## Options
 
 ```viml
-call s:InitVariable('g:termdbg_pdb_prog',   'pdb')
-call s:InitVariable('g:termdbg_pdb3_prog',  'pdb3')
+let g:termdbg_pdb_prog = 'pdb'
+let g:termdbg_pdb3_prog = 'pdb3'
+let g:termdbg_ipdb_prog = 'ipdb'
+let g:termdbg_ipdb3_prog = 'ipdb3'
 ```
 
 ## Screenshots
