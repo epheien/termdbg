@@ -130,6 +130,7 @@ function termdbg#StartDebug(bang, type, ...)
 
   call s:InstallCommands()
   call win_gotoid(s:startwin)
+  stopinsert
   call s:InstallWinbar()
 
   " Sign used to highlight the line where the program has stopped.
