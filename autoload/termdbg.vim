@@ -15,6 +15,7 @@ let s:loaded = 1
 let s:job_id = 0
 let s:ptybuf = 0
 let s:dbgwin = 0
+let s:config = {}
 
 func! s:splitdrive(p)
   if a:p[1:1] ==# ':'
@@ -59,7 +60,6 @@ let s:winbar_winids = []
 let s:cache_lines = []
 " for debug
 let termdbg#cache_lines = s:cache_lines
-let s:dbg_type = ''
 let s:prompt = '(Pdb) '
 " {bpnr: {lnum: ..., file: ...}, ...}
 let s:breakpoints = {}
@@ -142,12 +142,16 @@ function termdbg#StartDebug(bang, type, ...)
   sign define TermdbgBreak text=>> texthl=TermdbgBreak
 
   if a:type ==# 'ipdb' || a:type ==# 'ipdb3'
-    let s:dbg_type = 'ipdb'
-    let s:prompt = 'ipdb> '
+    let config = backend#ipdb#Get()
   elseif a:type ==# 'pdb' || a:type ==# 'pdb3'
-    let s:dbg_type = 'pdb'
-    let s:prompt = '(Pdb) '
+    let config = backend#pdb#Get()
+  else
+    echoerr 'unknown dbg type' a:type
+    return
   endif
+
+  let s:prompt = config['prompt']
+  let s:config = config
 
   augroup Termdbg
     autocmd BufRead * call s:BufRead()
@@ -165,7 +169,7 @@ endfunction
 " BUG: 虽然 msg 每次过来基本可以确定是整行的，但是行之间的顺序是不定的！
 function termdbg#on_stdout(job_id, msg)
   "echomsg string(a:msg)
-  if s:dbg_type ==# 'ipdb'
+  if get(s:config, 'trim_ansi_escape')
     " 去除 ipdb 的转义字符
     let lines = split(s:TrimAnsiEscape(a:msg), "\r")
   else
@@ -178,7 +182,7 @@ function termdbg#on_stdout(job_id, msg)
   endfor
 
   " 去除 ipdb 中多余的空行输出
-  if s:dbg_type ==# 'ipdb'
+  if get(s:config, 'trim_ansi_escape')
     call filter(lines, {idx, val -> val !~# '^\s\+$'})
     call filter(lines, '!empty(v:val)')
   endif
