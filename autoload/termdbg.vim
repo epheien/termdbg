@@ -67,12 +67,8 @@ let s:prompt = '(Pdb) '
 " {bpnr: {lnum: ..., file: ...}, ...}
 let s:breakpoints = {}
 
-if &background == 'light'
-  hi default TermdbgCursor term=reverse ctermbg=lightblue guibg=lightblue
-else
-  hi default TermdbgCursor term=reverse ctermbg=darkblue guibg=darkblue
-endif
-hi default TermdbgBreak term=reverse ctermbg=red guibg=red
+hi default link TermdbgCursor CursorLine
+hi default link TermdbgBreak Special
 
 function! s:InitVariable(var, value, ...)
   let force = a:0 > 0 ? a:1 : 0
@@ -138,7 +134,7 @@ function termdbg#StartDebug(bang, type, ...) abort
 
   " Sign used to indicate a breakpoint.
   " Can be used multiple times.
-  sign define TermdbgBreak text=>> texthl=TermdbgBreak
+  sign define TermdbgBreak text=o texthl=TermdbgBreak
 
   let type = a:type
   if type == ''
