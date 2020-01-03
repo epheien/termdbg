@@ -24,7 +24,7 @@ let s:config['print_cmd'] = 'p'
 " > main.main() ./a.go:14 (hits goroutine(1):1 total:1) (PC: 0x10f47db)
 let s:config['locate_pattern'] = {
       \ 'short': '^> ',
-      \ 'long': '\v^\> [a-zA-Z_0-9.]+\(\) ([^:]+):(\d+) .+$',
+      \ 'long': '\v^\> [^ ]+\(\) ([^:]+):(\d+) .+$',
       \ 'index': [1, 2],
       \ }
 
