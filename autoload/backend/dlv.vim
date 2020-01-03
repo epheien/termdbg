@@ -9,7 +9,7 @@
 "   - new breakpoint pattern
 "   - del breakpoint pattern
 
-let s:config = {}
+let s:config = backend#base#Get()
 let s:config['prompt'] = '(dlv) '
 let s:config['trim_ansi_escape'] = v:true
 let s:config['next_cmd'] = 'next'
@@ -18,7 +18,6 @@ let s:config['finish_cmd'] = 'stepout'
 let s:config['continue_cmd'] = 'continue'
 let s:config['break_cmd'] = 'break'
 let s:config['clear_cmd'] = 'clear'
-let s:config['bt_cmd'] = 'bt'
 let s:config['print_cmd'] = 'p'
 
 " > main.main() ./a.go:14 (hits goroutine(1):1 total:1) (PC: 0x10f47db)

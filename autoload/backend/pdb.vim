@@ -1,5 +1,5 @@
 
-let s:config = {}
+let s:config = backend#base#Get()
 let s:config['prompt'] = '(Pdb) '
 let s:config['next_cmd'] = 'next'
 let s:config['step_cmd'] = 'step'
@@ -7,7 +7,6 @@ let s:config['finish_cmd'] = 'return'
 let s:config['continue_cmd'] = 'continue'
 let s:config['break_cmd'] = 'break'
 let s:config['clear_cmd'] = 'clear'
-let s:config['bt_cmd'] = 'bt'
 
 " 用于快速判断输出的类型是否为定位字符串, 以提高性能
 " 提取定位的模式, 第一个子匹配为文件, 第二个子匹配为行号
