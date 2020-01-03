@@ -84,10 +84,6 @@ function! s:InitVariable(var, value, ...)
   endif
 endfunction
 
-call s:InitVariable('g:termdbg_pdb_prog',   'pdb')
-call s:InitVariable('g:termdbg_pdb3_prog',  'pdb3')
-call s:InitVariable('g:termdbg_ipdb_prog',  'ipdb')
-call s:InitVariable('g:termdbg_ipdb3_prog', 'ipdb3')
 " 启动时是否使用 shell
 call s:InitVariable('g:termdbg_use_shell', 0)
 
