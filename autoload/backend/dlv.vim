@@ -10,35 +10,39 @@
 "   - del breakpoint pattern
 
 let s:config = {}
-let s:config['prompt'] = 'ipdb> '
+let s:config['prompt'] = '(dlv) '
 let s:config['trim_ansi_escape'] = v:true
 let s:config['next_cmd'] = 'next'
 let s:config['step_cmd'] = 'step'
-let s:config['finish_cmd'] = 'return'
+let s:config['finish_cmd'] = 'stepout'
 let s:config['continue_cmd'] = 'continue'
 let s:config['break_cmd'] = 'break'
 let s:config['clear_cmd'] = 'clear'
 let s:config['bt_cmd'] = 'bt'
+let s:config['print_cmd'] = 'p'
 
+" > main.main() ./a.go:14 (hits goroutine(1):1 total:1) (PC: 0x10f47db)
 let s:config['locate_pattern'] = {
       \ 'short': '^> ',
-      \ 'long': '\v^\> (.+)\((\d+)\).*\(.*\).*$',
+      \ 'long': '\v^\> [a-zA-Z_0-9.]+\(\) ([^:]+):(\d+) .+$',
       \ 'index': [1, 2],
       \ }
 
+" Breakpoint 2 set at 0x10f47db for main.main() ./a.go:14
 let s:config['new_breakpoint_pattern'] = {
-      \ 'short': '^Breakpoint \d\+ at ',
-      \ 'long': '^Breakpoint \(\d\+\) at \(.\+\):\(\d\+\)',
+      \ 'short': '^Breakpoint \d\+ set at ',
+      \ 'long': '\v^Breakpoint (\d+) set at [^(]+\(\) ([^:]+):(\d+)$',
       \ 'index': [1, 2, 3],
       \ }
 
+" Breakpoint 1 cleared at 0x10f47db for main.main() ./a.go:14
 let s:config['del_breakpoint_pattern'] = {
-      \ 'short': '^Deleted breakpoint \d\+ at ',
-      \ 'long': '^Deleted breakpoint \(\d\+\) at \(.\+\):\(\d\+\)',
+      \ 'short': '^Breakpoint \d\+ cleared at ',
+      \ 'long': '\v^Breakpoint (\d+) cleared at [^(]+\(\) ([^:]+):(\d+)$',
       \ 'index': [1, 2, 3],
       \ }
 
-func backend#ipdb#Get()
+func backend#dlv#Get()
   return s:config
 endfunc
 

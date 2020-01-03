@@ -13,6 +13,7 @@ if exists('s:loaded')
 endif
 let s:loaded = 1
 let s:debug = v:false
+"let s:debug = v:true
 
 let s:job_id = 0
 let s:ptybuf = 0
@@ -91,7 +92,7 @@ call s:InitVariable('g:termdbg_ipdb3_prog', 'ipdb3')
 call s:InitVariable('g:termdbg_use_shell', 0)
 
 " (bang, type, *argv)
-function termdbg#StartDebug(bang, type, ...)
+function termdbg#StartDebug(bang, type, ...) abort
   if s:dbgwin > 0
     echoerr 'Terminal debugger is already running'
     return
@@ -143,12 +144,20 @@ function termdbg#StartDebug(bang, type, ...)
   " Can be used multiple times.
   sign define TermdbgBreak text=>> texthl=TermdbgBreak
 
-  if a:type ==# 'ipdb' || a:type ==# 'ipdb3'
+  let type = a:type
+  if type == ''
+    " 直接取命令名称作为类型
+    let type = fnamemodify(argv[0], ':t')
+  endif
+
+  if type ==# 'ipdb' || type ==# 'ipdb3'
     let config = backend#ipdb#Get()
-  elseif a:type ==# 'pdb' || a:type ==# 'pdb3'
+  elseif type ==# 'pdb' || type ==# 'pdb3'
     let config = backend#pdb#Get()
+  elseif type ==# 'dlv'
+    let config = backend#dlv#Get()
   else
-    echoerr 'unknown dbg type' a:type
+    echoerr 'unknown dbg type' type
     return
   endif
 
@@ -196,9 +205,11 @@ function termdbg#on_stdout(job_id, msg)
 
   " 无脑逐行匹配动作！
   for line in reverse(lines)
+    call s:dbg(line)
     if line =~# s:config.locate_pattern.short
+      echomsg "enter"
       " 光标定位
-      if !s:_LocateCursor(line)
+      if !termdbg#LocateCursor(line)
         execute 'sign unplace' s:pc_id
       endif
     elseif line =~# s:config.new_breakpoint_pattern.short
@@ -226,7 +237,7 @@ func s:HandleNewBreakpoint(msg)
     let entry = {}
     let s:breakpoints[nr] = entry
   endif
-  let entry['file'] = file
+  let entry['file'] = fnamemodify(file, ':p') " 转为绝对路径
   let entry['lnum'] = lnum
 
   if bufloaded(file)
@@ -299,7 +310,11 @@ function s:on_exit(job_id, status)
 endfunction
 
 function s:getbufmaxline(bufnr)
-  return pyxeval('len(vim.buffers['.(a:bufnr).'])')
+  if has('nvim')
+    return nvim_buf_line_count(a:bufnr)
+  else
+    return pyxeval('len(vim.buffers['.(a:bufnr).'])')
+  endif
 endfunction
 
 func s:GotoStartwinOrCreateIt()
@@ -340,8 +355,8 @@ function s:TermdbgContinue()
 endfunction
 
 " 返回 0 表示定位失败，否则表示定位成功
-func s:_LocateCursor(msg)
-  if a:msg[0:1] !=# '> '
+func termdbg#LocateCursor(msg)
+  if a:msg !~# s:config.locate_pattern.short
     return 0
   endif
 
@@ -349,6 +364,7 @@ func s:_LocateCursor(msg)
 
   let pattern = s:config.locate_pattern.long
   let matches = matchlist(a:msg, pattern)
+  call s:dbg(matches)
   let fname = ''
   if len(matches) >= 3
     let fname = matches[s:config.locate_pattern.index[0]]
@@ -356,7 +372,12 @@ func s:_LocateCursor(msg)
       let lnum = str2nr(matches[s:config.locate_pattern.index[1]])
     endif
   endif
-  if empty(fname) || !s:isabs(fname)
+  "if empty(fname) || !s:isabs(fname)
+  if empty(fname)
+    return 0
+  endif
+  if !bufexists(fname) && !filereadable(fname)
+    echoerr fname 'not found'
     return 0
   endif
 
@@ -404,7 +425,7 @@ function s:LocateCursor()
     if line !~# s:config.locate_pattern.short
       continue
     endif
-    if !s:_LocateCursor(line)
+    if !termdbg#LocateCursor(line)
       execute 'sign unplace' s:pc_id
     endif
     break
@@ -418,7 +439,7 @@ func s:InstallCommands()
   command TContinue call s:TermdbgContinue()
   command TLocateCursor call s:LocateCursor()
   command TBreakpoint call s:SetBreakpoint()
-  command TClearBreak call s:ClearBreakpoint()
+  command TClearBreak call termdbg#ClearBreakpoint()
   command TToggleBreak call s:ToggleBreak()
   command -nargs=1 TSendCommand call s:SendCommand(<q-args>)
 endfunc
@@ -467,15 +488,15 @@ func s:TrimAnsiEscape(msg)
 endfunc
 
 func s:SetBreakpoint()
-  call s:SendCommand(printf('break %s:%d', fnameescape(expand('%:p')), line('.')))
+  call s:SendCommand(printf('%s %s:%d', s:config.break_cmd, fnameescape(expand('%:p')), line('.')))
 endfunc
 
-func s:ClearBreakpoint()
+func termdbg#ClearBreakpoint()
   let file = fnameescape(expand('%:p'))
   let lnum = line('.')
   for [key, val] in items(s:breakpoints)
     if val['file'] ==# file && val['lnum'] == lnum
-      call s:SendCommand('clear ' . key)
+      call s:SendCommand(printf('%s %s', s:config.clear_cmd, key))
       break
     endif
   endfor
@@ -526,7 +547,7 @@ func s:ToggleBreak()
     endif
   endfor
   if found
-    call s:ClearBreakpoint()
+    call termdbg#ClearBreakpoint()
   else
     call s:SetBreakpoint()
   endif
@@ -562,7 +583,7 @@ func s:dbg(...)
   endif
   let li = copy(a:000)
   let li = map(li, {_, j -> string(j)})
-  echo join(li, ' ')
+  echomsg join(li, ' ')
 endfunc
 
 " vi:set sts=2 sw=2 et:
