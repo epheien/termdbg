@@ -203,7 +203,6 @@ function termdbg#on_stdout(job_id, msg)
   for line in reverse(lines)
     call s:dbg(line)
     if line =~# s:config.locate_pattern.short
-      echomsg "enter"
       " 光标定位
       if !termdbg#LocateCursor(line)
         execute 'sign unplace' s:pc_id
