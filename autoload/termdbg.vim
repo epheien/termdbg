@@ -152,6 +152,8 @@ function termdbg#StartDebug(bang, type, ...) abort
     let config = backend#pdb#Get()
   elseif type ==# 'dlv'
     let config = backend#dlv#Get()
+  elseif type ==# 'lldb'
+    let config = backend#lldb#Get()
   else
     echoerr 'unknown dbg type' type
     return
@@ -209,7 +211,7 @@ function termdbg#on_stdout(job_id, msg)
       endif
     elseif line =~# s:config.new_breakpoint_pattern.short
       call s:HandleNewBreakpoint(line)
-    elseif line =~# s:config.del_breakpoint_pattern.short
+    elseif !empty(s:config.del_breakpoint_pattern.short) && line =~# s:config.del_breakpoint_pattern.short
       call s:HandleDelBreakpoint(line)
     endif
   endfor
@@ -245,9 +247,9 @@ func s:HandleDelBreakpoint(msg)
   let matches = matchlist(a:msg, s:config.del_breakpoint_pattern.long)
   call s:dbg(matches)
   let bpnr = get(matches, 1, 0)
-  let file = get(matches, 2, '')
-  let lnum = get(matches, 3, 0)
-  if bpnr == 0 || empty(file) || lnum == 0
+  "let file = get(matches, 2, '')
+  "let lnum = get(matches, 3, 0)
+  if bpnr == 0
     return
   endif
   if has_key(s:breakpoints, bpnr)
@@ -489,9 +491,17 @@ endfunc
 func termdbg#ClearBreakpoint()
   let file = fnameescape(expand('%:p'))
   let lnum = line('.')
-  for [key, val] in items(s:breakpoints)
-    if val['file'] ==# file && val['lnum'] == lnum
-      call s:SendCommand(printf('%s %s', s:config.clear_cmd, key))
+  for [bpid, entry] in items(s:breakpoints)
+    if entry['file'] ==# file && entry['lnum'] == lnum
+      call s:SendCommand(printf('%s %s', s:config.clear_cmd, bpid))
+      " lldb 无法使用兜底的确认机制, 这里就直接删除
+      if empty(s:config.del_breakpoint_pattern.short)
+        if get(entry, 'placed', 0)
+          execute 'sign unplace' (s:break_id + bpid)
+          let entry['placed'] = 0
+        endif
+        unlet s:breakpoints[bpid]
+      endif
       break
     endif
   endfor
