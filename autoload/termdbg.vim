@@ -12,6 +12,8 @@ if exists('s:loaded')
   finish
 endif
 let s:loaded = 1
+let s:debug = v:false
+
 let s:job_id = 0
 let s:ptybuf = 0
 let s:dbgwin = 0
@@ -194,14 +196,14 @@ function termdbg#on_stdout(job_id, msg)
 
   " 无脑逐行匹配动作！
   for line in reverse(lines)
-    if line =~# '^> '
+    if line =~# s:config.locate_pattern.short
       " 光标定位
       if !s:_LocateCursor(line)
         execute 'sign unplace' s:pc_id
       endif
-    elseif line =~# '^Breakpoint \d\+ at '
+    elseif line =~# s:config.new_breakpoint_pattern.short
       call s:HandleNewBreakpoint(line)
-    elseif line =~# '^Deleted breakpoint \d\+ at '
+    elseif line =~# s:config.del_breakpoint_pattern.short
       call s:HandleDelBreakpoint(line)
     endif
   endfor
@@ -209,7 +211,8 @@ endfunction
 
 " Breakpoint 1 at /Users/eph/a.py:16
 func s:HandleNewBreakpoint(msg)
-  let matches = matchlist(a:msg, '^Breakpoint \(\d\+\) at \(.\+\):\(\d\+\)')
+  let matches = matchlist(a:msg, s:config.new_breakpoint_pattern.long)
+  call s:dbg(matches)
   let nr = get(matches, 1, 0)
   let file = get(matches, 2, '')
   let lnum = get(matches, 3, 0)
@@ -233,7 +236,8 @@ endfunc
 
 " Deleted breakpoint 1 at /Users/eph/a.py:16
 func s:HandleDelBreakpoint(msg)
-  let matches = matchlist(a:msg, '^Deleted breakpoint \(\d\+\) at \(.\+\):\(\d\+\)')
+  let matches = matchlist(a:msg, s:config.del_breakpoint_pattern.long)
+  call s:dbg(matches)
   let bpnr = get(matches, 1, 0)
   let file = get(matches, 2, '')
   let lnum = get(matches, 3, 0)
@@ -320,19 +324,19 @@ func s:InstallWinbar()
 endfunc
 
 function s:TermdbgNext()
-  call s:SendCommand('next')
+  call s:SendCommand(s:config['next_cmd'])
 endfunction
 
 function s:TermdbgStep()
-  call s:SendCommand('step')
+  call s:SendCommand(s:config['step_cmd'])
 endfunction
 
 function s:TermdbgFinish()
-  call s:SendCommand('return')
+  call s:SendCommand(s:config['finish_cmd'])
 endfunction
 
 function s:TermdbgContinue()
-  call s:SendCommand('continue')
+  call s:SendCommand(s:config['continue_cmd'])
 endfunction
 
 " 返回 0 表示定位失败，否则表示定位成功
@@ -343,12 +347,13 @@ func s:_LocateCursor(msg)
 
   let wid = win_getid(winnr())
 
-  let matches = matchlist(a:msg, '\v^\> (.+)\((\d+)\).*\(.*\).*$')
+  let pattern = s:config.locate_pattern.long
+  let matches = matchlist(a:msg, pattern)
   let fname = ''
   if len(matches) >= 3
-    let fname = matches[1]
+    let fname = matches[s:config.locate_pattern.index[0]]
     if filereadable(fname)
-      let lnum = str2nr(matches[2])
+      let lnum = str2nr(matches[s:config.locate_pattern.index[1]])
     endif
   endif
   if empty(fname) || !s:isabs(fname)
@@ -396,7 +401,7 @@ function s:LocateCursor()
         "break
       "endif
     endif
-    if line !~# '^> '
+    if line !~# s:config.locate_pattern.short
       continue
     endif
     if !s:_LocateCursor(line)
@@ -549,6 +554,15 @@ func s:BufUnloaded()
       let entry['placed'] = 0
     endif
   endfor
+endfunc
+
+func s:dbg(...)
+  if !s:debug
+    return
+  endif
+  let li = copy(a:000)
+  let li = map(li, {_, j -> string(j)})
+  echo join(li, ' ')
 endfunc
 
 " vi:set sts=2 sw=2 et:
