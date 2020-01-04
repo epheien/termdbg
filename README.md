@@ -1,7 +1,8 @@
 # termdbg
 
 Termdbg is a terminal debugger plugin for vim 8.1+ and neovim 0.3.6+.  
-Currently, termdbg only supports pdb, if you need gdb support, try termdebug (`:h termdebug`)
+Currently, termdbg supports pdb, ipdb, lldb, dlv(go Delve).  
+If you need gdb support, try termdebug (`:h termdebug`)
 
 Currently, termdbg just only do these things:
 - locate cursor to current runing line when debugger
@@ -24,7 +25,7 @@ For manual installation
 
 ## Usage
 
-Run `TermdbgPdb {pyfile}`
+Run `Termdbg {debugger} {file}`
 
 ## Commands
 
@@ -34,16 +35,11 @@ Run `TermdbgPdb {pyfile}`
 - `:TContinue` Continue
 - `:TLocateCursor` Locate cursor to running line
 - `:TToggleBreak` Toggle breakpoint in current line
+- `:TSendCommand` Send command to debugger
 
 
 ## Options
-
-```viml
-let g:termdbg_pdb_prog = 'pdb'
-let g:termdbg_pdb3_prog = 'pdb3'
-let g:termdbg_ipdb_prog = 'ipdb'
-let g:termdbg_ipdb3_prog = 'ipdb3'
-```
+None.
 
 ## Screenshots
 
