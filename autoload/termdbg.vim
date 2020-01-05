@@ -490,7 +490,7 @@ func s:SetBreakpoint()
 endfunc
 
 func termdbg#ClearBreakpoint()
-  let file = fnameescape(expand('%:p'))
+  let file = expand('%:p')
   let lnum = line('.')
   for [bpid, entry] in items(s:breakpoints)
     if entry['file'] ==# file && entry['lnum'] == lnum
