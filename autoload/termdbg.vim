@@ -471,9 +471,11 @@ endfunc
 func s:SendCommand(cmd)
   if has('nvim')
     if s:job_id > 0
+      call jobsend(s:job_id, "\<C-u>")
       call jobsend(s:job_id, a:cmd . "\r")
     endif
   else
+    call term_sendkeys(s:ptybuf, "\<C-u>")
     call term_sendkeys(s:ptybuf, a:cmd . "\r")
   endif
 endfunc
