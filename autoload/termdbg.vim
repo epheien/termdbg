@@ -67,7 +67,7 @@ let s:prompt = '(Pdb) '
 " {bpnr: {lnum: ..., file: ...}, ...}
 let s:breakpoints = {}
 
-hi default link TermdbgCursor CursorLine
+hi default link TermdbgCursor Identifier
 hi default link TermdbgBreak Special
 
 function! s:InitVariable(var, value, ...)
@@ -130,7 +130,7 @@ function termdbg#StartDebug(bang, type, ...) abort
 
   " Sign used to highlight the line where the program has stopped.
   " There can be only one.
-  sign define TermdbgCursor linehl=TermdbgCursor
+  sign define TermdbgCursor text==> linehl=CursorLine texthl=TermdbgCursor
 
   " Sign used to indicate a breakpoint.
   " Can be used multiple times.
@@ -392,8 +392,8 @@ func termdbg#LocateCursor(msg)
   " 定位调试行
   execute lnum
   execute 'sign unplace' s:pc_id
-  execute 'sign place ' . s:pc_id . ' line=' . lnum . ' name=TermdbgCursor file=' . fname
-  setlocal signcolumn=yes
+  execute printf('sign place %s line=%d name=TermdbgCursor file=%s', s:pc_id, lnum, fname)
+  "setlocal signcolumn=yes
 
   call win_gotoid(wid)
 
