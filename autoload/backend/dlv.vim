@@ -30,14 +30,14 @@ let s:config['locate_pattern'] = {
 " Breakpoint 2 set at 0x10f47db for main.main() ./a.go:14
 let s:config['new_breakpoint_pattern'] = {
       \ 'short': '^Breakpoint \d\+ set at ',
-      \ 'long': '\v^Breakpoint (\d+) set at [^(]+\(\) ([^:]+):(\d+)$',
+      \ 'long': '\v^Breakpoint (\d+) set at .+\(\) ([^:]+):(\d+)$',
       \ 'index': [1, 2, 3],
       \ }
 
 " Breakpoint 1 cleared at 0x10f47db for main.main() ./a.go:14
 let s:config['del_breakpoint_pattern'] = {
       \ 'short': '^Breakpoint \d\+ cleared at ',
-      \ 'long': '\v^Breakpoint (\d+) cleared at [^(]+\(\) ([^:]+):(\d+)$',
+      \ 'long': '\v^Breakpoint (\d+) cleared at .+\(\) ([^:]+):(\d+)$',
       \ 'index': [1, 2, 3],
       \ }
 
