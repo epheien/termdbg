@@ -58,7 +58,7 @@ func! s:GetCmdOutput(sCmd)
 endfunc
 
 let s:pc_id = 1002
-let s:break_id = 1003
+let s:break_id = 1010
 let s:winbar_winids = []
 let s:cache_lines = []
 " for debug
@@ -240,6 +240,9 @@ endfunc
 
 " Deleted breakpoint 1 at /Users/eph/a.py:16
 func s:HandleDelBreakpoint(msg)
+  if empty(s:config.del_breakpoint_pattern.short)
+    return
+  endif
   let matches = matchlist(a:msg, s:config.del_breakpoint_pattern.long)
   call s:dbg(matches)
   let bpnr = get(matches, 1, 0)
