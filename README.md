@@ -43,4 +43,4 @@ None.
 
 ## Screenshots
 
-![termdbg](https://ws3.sinaimg.cn/large/006tNc79gy1g02vid3jvij30u00ucdq1.jpg)
+![termdbg](https://raw.githubusercontent.com/epheien/termdbg/master/screenshots/dlv.png)
