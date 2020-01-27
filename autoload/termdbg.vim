@@ -357,6 +357,7 @@ func termdbg#LocateCursor(msg)
   endif
 
   let wid = win_getid(winnr())
+  let mode = mode()
 
   let pattern = s:config.locate_pattern.long
   let matches = matchlist(a:msg, pattern)
@@ -399,6 +400,9 @@ func termdbg#LocateCursor(msg)
   "setlocal signcolumn=yes
 
   call win_gotoid(wid)
+  if mode ==# 't'
+    call feedkeys('i', 'n')
+  endif
 
   return 1
 endfunc
