@@ -393,6 +393,9 @@ func termdbg#LocateCursor(msg)
     endif
   endif
 
+  let bak_so = &scrolloff
+  " 调试的时候, scrolloff 固定为 5, 这和很多终端调试器保持了一致
+  set scrolloff=5
   " 定位调试行
   execute lnum
   execute 'sign unplace' s:pc_id
@@ -404,6 +407,7 @@ func termdbg#LocateCursor(msg)
     call feedkeys('i', 'n')
   endif
 
+  let &scrolloff = bak_so
   return 1
 endfunc
 
