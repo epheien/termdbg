@@ -407,6 +407,8 @@ func termdbg#LocateCursor(msg)
     call feedkeys('i', 'n')
   endif
 
+  " redraw 一下才能保证 scrolloff 的配置生效
+  redraw
   let &scrolloff = bak_so
   return 1
 endfunc
