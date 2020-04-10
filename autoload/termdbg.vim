@@ -403,7 +403,7 @@ func termdbg#LocateCursor(msg)
   "setlocal signcolumn=yes
 
   call win_gotoid(wid)
-  if mode ==# 't'
+  if has('nvim') && mode ==# 't'
     call feedkeys('i', 'n')
   endif
 
