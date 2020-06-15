@@ -84,7 +84,7 @@ endfunction
 call s:InitVariable('g:termdbg_use_shell', 0)
 
 " (bang, type, *argv)
-function termdbg#StartDebug(bang, type, ...) abort
+function termdbg#StartDebug(bang, type, mods, ...) abort
   if s:dbgwin > 0
     echoerr 'Terminal debugger is already running'
     return
@@ -103,13 +103,13 @@ function termdbg#StartDebug(bang, type, ...) abort
     let argv = [&shell, &shellcmdflag] + [join(map(argv, {idx, val -> shellescape(val)}), ' ')]
   endif
 
+  exec a:mods "new 'Terminal debugger'"
   if has('nvim')
     let callbacks = {
       \ 'on_stdout': function('s:on_event'),
       \ 'on_stderr': function('s:on_event'),
       \ 'on_exit': function('s:on_event')
       \ }
-    new 'Terminal debugger'
     let s:ptybuf = bufnr('%')
     let s:job_id = termopen(argv, extend({}, callbacks))
   else
@@ -119,6 +119,7 @@ function termdbg#StartDebug(bang, type, ...) abort
           \ 'err_cb': function('s:on_stderr'),
           \ 'exit_cb': function('s:on_exit'),
           \ 'term_finish': 'close',
+          \ 'curwin': v:true,
           \ })
   endif
   let s:dbgwin = win_getid(winnr())
