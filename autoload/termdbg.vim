@@ -351,6 +351,21 @@ function s:TermdbgContinue()
   call s:SendCommand(s:config['continue_cmd'])
 endfunction
 
+" nvim 有 BUG, 在终端窗口跳去其他窗口开启 scrolloff, 跳到指定行后, scrolloff 无效
+function s:RefreshScrolloff()
+  let off = &scrolloff
+  if off <= 0
+    return
+  endif
+  let wline = winline()
+  let wheight = winheight(0)
+  if wline < off
+    exec 'normal!' "z\<CR>"
+  elseif wline > wheight - off
+    normal! zb
+  endif
+endfunction
+
 " 返回 0 表示定位失败，否则表示定位成功
 func termdbg#LocateCursor(msg)
   if a:msg !~# s:config.locate_pattern.short
@@ -403,6 +418,9 @@ func termdbg#LocateCursor(msg)
   execute printf('sign place %s line=%d name=TermdbgCursor file=%s', s:pc_id, lnum, fname)
   "setlocal signcolumn=yes
 
+  if has('nvim')
+    call s:RefreshScrolloff()
+  endif
   call win_gotoid(wid)
   if has('nvim') && mode ==# 't'
     call feedkeys('i', 'n')
