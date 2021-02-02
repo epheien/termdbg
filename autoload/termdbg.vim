@@ -381,17 +381,22 @@ func termdbg#LocateCursor(msg)
   let fname = ''
   if len(matches) >= 3
     let fname = matches[s:config.locate_pattern.index[0]]
-    if filereadable(fname)
-      let lnum = str2nr(matches[s:config.locate_pattern.index[1]])
-    endif
+    let lnum = str2nr(matches[s:config.locate_pattern.index[1]])
   endif
   "if empty(fname) || !s:isabs(fname)
   if empty(fname)
     return 0
   endif
-  if !bufexists(fname) && !filereadable(fname)
-    echoerr fname 'not found'
-    return 0
+
+  if !filereadable(fname)
+    let fname = findfile(fname, './**3', 1)
+  endif
+
+  if !bufexists(fname)
+    if !filereadable(fname)
+      return 0
+    endif
+    bufload(fname)
   endif
 
   call s:GotoStartwinOrCreateIt()
