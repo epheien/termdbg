@@ -197,9 +197,10 @@ function termdbg#GetLastCommand()
       if empty(cmd)
         continue
       endif
-      return cmd
+      return [lnum, cmd]
     endif
   endfor
+  return [0, '']
 endfunction
 
 " 只要在终端窗口一定时间内（n毫秒）有连续的输出，就会进入此回调
@@ -495,6 +496,11 @@ function s:LocateCursor()
   if s:ptybuf <= 0
     return
   endif
+
+  if has_key(s:config, 'locate_function')
+    return s:config.locate_function(s:ptybuf, s:dbgwin)
+  endif
+
   let maxlnum = s:getbufmaxline(s:ptybuf)
   let min = 1
   let pdb_cnt = 0
