@@ -237,7 +237,7 @@ function termdbg#on_stdout(job_id, msg)
     call s:dbg(line)
     if line =~# s:config.locate_pattern.short
       " 光标定位
-      if !located && !termdbg#LocateCursor(line)
+      if !located && !termdbg#MatchLocateCursor(line)
         execute 'sign unplace' s:pc_id
       else
         let located = v:true
@@ -404,26 +404,13 @@ endfunction
 
 let s:last_feedkeys_reltime = reltime()
 " 返回 0 表示定位失败，否则表示定位成功
-func termdbg#LocateCursor(msg)
-  " TODO: 避免重复检查
-  if a:msg !~# s:config.locate_pattern.short
-    return 0
-  endif
+func termdbg#LocateCursor(fname, lnum)
+  let fname = a:fname
+  let lnum = a:lnum
 
   let wid = win_getid(winnr())
   let mode = mode()
 
-  let pattern = s:config.locate_pattern.long
-  let matches = matchlist(a:msg, pattern)
-  call s:dbg(matches)
-  let fname = ''
-  if len(matches) >= 3
-    let fname = matches[s:config.locate_pattern.index[0]]
-    if filereadable(fname)
-      let lnum = str2nr(matches[s:config.locate_pattern.index[1]])
-    endif
-  endif
-  "if empty(fname) || !s:isabs(fname)
   if empty(fname)
     return 0
   endif
@@ -484,6 +471,26 @@ func termdbg#LocateCursor(msg)
   return 1
 endfunc
 
+let s:last_feedkeys_reltime = reltime()
+" 返回 0 表示定位失败，否则表示定位成功
+func termdbg#MatchLocateCursor(msg)
+  " TODO: 避免重复检查
+  if a:msg !~# s:config.locate_pattern.short
+    return 0
+  endif
+
+  let pattern = s:config.locate_pattern.long
+  let matches = matchlist(a:msg, pattern)
+  call s:dbg(matches)
+  let fname = ''
+  let lnum = 0
+  if len(matches) >= 3
+    let fname = matches[s:config.locate_pattern.index[0]]
+    let lnum = str2nr(matches[s:config.locate_pattern.index[1]])
+  endif
+  return termdbg#LocateCursor(fname, lnum)
+endfunc
+
 function s:LocateCursor()
   if s:ptybuf <= 0
     return
@@ -502,7 +509,7 @@ function s:LocateCursor()
     if line !~# s:config.locate_pattern.short
       continue
     endif
-    if !termdbg#LocateCursor(line)
+    if !termdbg#MatchLocateCursor(line)
       execute 'sign unplace' s:pc_id
     endif
     break
