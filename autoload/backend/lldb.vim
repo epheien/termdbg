@@ -12,7 +12,10 @@ let s:config['print_cmd'] = 'p'
 let s:file = expand('<sfile>')
 let s:dir = fnamemodify(s:file, ':h')
 " TODO: Windows
-let s:config['init_cmds'] = 'command source ' . s:dir . '/scripts/lldbinit'
+let s:config['init_cmds'] = [
+      \ 'command source ' . s:dir . '/scripts/lldbinit',
+      \ 'command script import ' . s:dir . '/scripts/custom_breakpoint.py'
+      \]
 
 " frame #0: 0x0000000100000f74 a.out`main(argc=1, argv=0x00007ffeefbff700) at a.c:5:2
 let s:config['locate_pattern'] = {
@@ -22,9 +25,11 @@ let s:config['locate_pattern'] = {
       \ }
 
 " Breakpoint 4: where = a.out`main + 22 at a.c:4:2, address = 0x0000000100000f66
+" Breakpoint 00 set at /Users/eph/wsp/cpp-cmake/src/main.cpp:6
+" backup: '\v^Breakpoint (\d+): where = .+ at ([^:]+):(\d+):\d+, .*$',
 let s:config['new_breakpoint_pattern'] = {
-      \ 'short': '^Breakpoint \d\+: ',
-      \ 'long': '\v^Breakpoint (\d+): where = .+ at ([^:]+):(\d+):\d+, .*$',
+      \ 'short': '^Breakpoint \d\+ ',
+      \ 'long': '\v^Breakpoint (\d+) set at ([^:]+):(\d+)$',
       \ 'index': [1, 2, 3],
       \ }
 
