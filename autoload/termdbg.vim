@@ -16,7 +16,7 @@ let s:debug = v:false
 "let s:debug = v:true
 
 let s:job_id = 0
-let s:ptybuf = 0
+let s:ptybuf = 0 " 调试器缓冲区号
 let s:dbgwin = 0
 let s:config = {}
 
@@ -179,7 +179,7 @@ function termdbg#StartDebug(bang, type, mods, ...) abort
   endif
 
   " 初始跳到调试窗口，以方便输入命令，然而，回调会重定位光标
-  call win_gotoid(s:ptybuf)
+  call win_gotoid(s:dbgwin)
 endfunction
 
 " 只要在终端窗口一定时间内（n毫秒）有连续的输出，就会进入此回调
@@ -531,13 +531,18 @@ func s:DeleteWinbar()
 endfunc
 
 func s:SendCommand(cmd)
+  let last_line = get(getbufline(s:ptybuf, line('$', s:dbgwin)), 0, '')
   if has('nvim')
     if s:job_id > 0
-      call jobsend(s:job_id, "\<C-u>")
+      if last_line !=# s:prompt
+        call jobsend(s:job_id, "\<C-u>")
+      endif
       call jobsend(s:job_id, a:cmd . "\r")
     endif
   else
-    call term_sendkeys(s:ptybuf, "\<C-u>")
+    if last_line !=# s:prompt
+      call term_sendkeys(s:ptybuf, "\<C-u>")
+    endif
     call term_sendkeys(s:ptybuf, a:cmd . "\r")
   endif
 endfunc
