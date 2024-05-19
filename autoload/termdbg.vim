@@ -89,6 +89,11 @@ function termdbg#StartDebug(bang, type, mods, ...) abort
     echoerr 'Terminal debugger is already running'
     return
   endif
+  if len(a:000) == 0
+    echo "Usage: Termdbg {debugger} {file}"
+    echo "Supported debuggers: pdb, ipdb, lldb, dlv, gdb, pdb3, ipdb3"
+    return
+  endif
   if !executable(a:1)
     echoerr 'command not found:' a:1
     return

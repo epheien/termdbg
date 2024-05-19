@@ -5,9 +5,9 @@
 " Change:       2019-02-11
 
 if !has('nvim') && !has('terminal')
-  "echohl WarningMsg
-  "echomsg 'termdbg need compliled with +terminal'
-  "echohl None
+  echohl WarningMsg
+  echomsg 'termdbg need compliled with +terminal'
+  echohl None
   finish
 endif
 
@@ -16,6 +16,11 @@ if exists('s:loaded')
 endif
 let s:loaded = 1
 
-command -nargs=+ -complete=file -bang Termdbg call termdbg#StartDebug(<bang>0, '', <q-mods>, <f-args>)
+command -nargs=* -complete=file -bang Termdbg call termdbg#StartDebug(<bang>0, '', <q-mods>, <f-args>)
+
+"func TermdbgComplete(argLead, cmdLine, cursorPos)
+"  echomsg string(a:argLead) string(a:cmdLine) string(a:cursorPos)
+"  return join(['pdb', 'pdb3', 'ipdb', 'ipdb3', 'dlv', 'gdb', 'lldb'], "\n")
+"endfunc
 
 " vim:sts=2:sw=2:et:
