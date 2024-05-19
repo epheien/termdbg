@@ -35,7 +35,7 @@ let s:config['new_breakpoint_pattern'] = {
 
 " (lldb) breakpoint delete 2
 " 1 breakpoints deleted; 0 breakpoint locations disabled.
-" lldb 没办法使用确认机制
+" NOTE: lldb 没办法使用确认机制
 let s:config['del_breakpoint_pattern'] = {
       \ 'short': '',
       \ 'long': '',
