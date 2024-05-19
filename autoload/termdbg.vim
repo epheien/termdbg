@@ -92,6 +92,7 @@ function termdbg#StartDebug(bang, type, mods, ...) abort
   if len(a:000) == 0
     echo "Usage: Termdbg {debugger} {file}"
     echo "Supported debuggers: pdb, ipdb, lldb, dlv, gdb, pdb3, ipdb3"
+    echo "Example: Termdbg ipdb3 a.py"
     return
   endif
   if !executable(a:1)
