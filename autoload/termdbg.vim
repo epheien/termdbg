@@ -415,7 +415,7 @@ func termdbg#LocateCursor(msg)
     return 0
   endif
   if !bufexists(fname) && !filereadable(fname)
-    echoerr fname 'not found'
+    echoerr 'file not found:' fname
     return 0
   endif
 
