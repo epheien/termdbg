@@ -187,6 +187,21 @@ function termdbg#StartDebug(bang, type, mods, ...) abort
   call win_gotoid(s:dbgwin)
 endfunction
 
+" 从缓存的输出中寻找最近运行的命令
+function termdbg#GetLastCommand()
+  let length = len(s:prompt)
+  for lnum in range(line('$', s:dbgwin), 1, -1)
+    let line = getbufline(s:ptybuf, lnum)[0]
+    if line =~# '\V\^' . s:prompt . '\.\+\$'
+      let cmd = trim(line[length:])
+      if empty(cmd)
+        continue
+      endif
+      return cmd
+    endif
+  endfor
+endfunction
+
 " 只要在终端窗口一定时间内（n毫秒）有连续的输出，就会进入此回调
 " 不保证 msg 是一整行
 " 因为绝大多数程序的标准输出是行缓冲的，所以一般情况下（手动输入除外），
@@ -218,7 +233,7 @@ function termdbg#on_stdout(job_id, msg)
 
   let located = v:false " 仅允许定位一次
   " 无脑逐行匹配动作！
-  for line in reverse(lines)
+  for line in reverse(copy(lines))
     call s:dbg(line)
     if line =~# s:config.locate_pattern.short
       " 光标定位
