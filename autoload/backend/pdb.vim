@@ -1,4 +1,3 @@
-
 let s:config = backend#base#Get()
 let s:config['prompt'] = '(Pdb) '
 let s:config['next_cmd'] = 'next'
