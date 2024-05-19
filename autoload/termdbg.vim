@@ -174,7 +174,6 @@ function termdbg#StartDebug(bang, type, mods, ...) abort
 
   " 运行初始化命令, 一般用来导入用于此插件的脚本
   if has_key(s:config, 'init_cmds')
-    echomsg string(s:config.init_cmds)
     if type(s:config.init_cmds) == type('')
       call s:SendCommand(s:config.init_cmds)
     elseif type(s:config.init_cmds) == type([])
@@ -194,7 +193,6 @@ endfunction
 " msg 是成整行的，可能是多个整行
 " BUG: 虽然 msg 每次过来基本可以确定是整行的，但是行之间的顺序是不定的！
 function termdbg#on_stdout(job_id, msg)
-  "echomsg string(a:msg)
   if get(s:config, 'trim_ansi_escape')
     " 去除 ipdb 的转义字符
     let lines = split(s:TrimAnsiEscape(a:msg), "\r")
