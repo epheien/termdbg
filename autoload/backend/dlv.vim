@@ -23,9 +23,9 @@ let s:config['print_cmd'] = 'p'
 " > main.main() ./a.go:14 (hits goroutine(1):1 total:1) (PC: 0x10f47db)
 " Frame 1: ./fsrunner/runner.go:10343 (PC: 166d13a)
 let s:config['locate_pattern'] = {
-      \ 'short': '^> ',
-      \ 'long': '\v^\> [^ ]+\(\) ([^:]+):(\d+) .+$',
-      \ 'index': [1, 2],
+      \ 'short': '^> \|^Frame \d\+:',
+      \ 'long': ['\v^\> [^ ]+\(\) ([^:]+):(\d+) .+$', '\v^Frame \d+: ([^:]+):(\d+) .+$'],
+      \ 'index': [[1, 2], [1, 2]],
       \ }
 
 " Breakpoint 2 set at 0x10f47db for main.main() ./a.go:14

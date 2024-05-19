@@ -480,16 +480,25 @@ func termdbg#MatchLocateCursor(msg)
     return 0
   endif
 
-  let pattern = s:config.locate_pattern.long
-  let matches = matchlist(a:msg, pattern)
-  call s:dbg(matches)
-  let fname = ''
-  let lnum = 0
-  if len(matches) >= 3
-    let fname = matches[s:config.locate_pattern.index[0]]
-    let lnum = str2nr(matches[s:config.locate_pattern.index[1]])
+  " 多个长模式连续匹配
+  let patterns = s:config.locate_pattern.long
+  let indexs = s:config.locate_pattern.index
+  if type(patterns) == type('')
+    let patterns = [patterns]
+    let indexs = [indexs]
   endif
-  return termdbg#LocateCursor(fname, lnum)
+  for idx in range(len(patterns))
+    let pattern = patterns[idx]
+    let index = indexs[idx]
+    let matches = matchlist(a:msg, pattern)
+    call s:dbg(matches)
+    let fname = get(matches, index[0], '')
+    let lnum = str2nr(get(matches, index[1]))
+    if empty(fname) || lnum <= 0
+      continue
+    endif
+    return termdbg#LocateCursor(fname, lnum)
+  endfor
 endfunc
 
 function s:LocateCursor()
