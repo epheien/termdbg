@@ -20,8 +20,9 @@ endif
 " Temporary breakpoint 2, main () at /home/eph/cpp-cmake/src/main.cpp:5
 " Breakpoint 1, main () at /home/eph/cpp-cmake/src/main.cpp:6
 " #0  main () at /home/eph/cpp-cmake/src/main.cpp:5
+" std::thread::thread<main()::<lambda(int)>, int>(struct {...} &&) (this=0x7fffffffdfa0, __f=...) at /usr/include/c++/11/bits/std_thread.h:127
 let s:config['locate_pattern'] = {
-      \ 'short': '^#\d\+ \|^Temporary breakpoint \d\+,\|^Breakpoint \d\+,',
+      \ 'short': '^#\d\+ \|^Temporary breakpoint \d\+,\|^Breakpoint \d\+,\|\v\) at ([^:]+):(\d+)$',
       \ 'long': '\v.+ at ([^:]+):(\d+)$',
       \ 'index': [1, 2],
       \ }

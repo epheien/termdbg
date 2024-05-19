@@ -435,7 +435,12 @@ func termdbg#LocateCursor(msg)
   if has('nvim')
     call s:RefreshScrolloff()
   endif
+  let ei_bak = &eventignore
+  set eventignore=WinEnter " 暂时忽略重新进入终端的窗口事件
   call win_gotoid(wid)
+  let &eventignore = ei_bak
+
+  " 自动进入插入模式, 用 startinsert 无效, 应该是 BUG
   if has('nvim') && mode ==# 't'
     call feedkeys('i', 'n')
   endif
