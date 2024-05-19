@@ -35,6 +35,9 @@ Usage: `Termdbg {debugger} {file} [args]`
 
 Example: `Termdbg ipdb3 a.py`
 
+Note: If your debug cursor is not located correctly, execute `:TLocateCursor`
+and it will locate the cursor as correctly as possible.
+
 ## Commands
 
 - `:TNext` Step over
