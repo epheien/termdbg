@@ -9,6 +9,11 @@ let s:config['break_cmd'] = 'b'
 let s:config['clear_cmd'] = 'breakpoint delete'
 let s:config['print_cmd'] = 'p'
 
+let s:file = expand('<sfile>')
+let s:dir = fnamemodify(s:file, ':h')
+" TODO: Windows
+let s:config['init_cmds'] = 'command source ' . s:dir . '/scripts/lldbinit'
+
 " frame #0: 0x0000000100000f74 a.out`main(argc=1, argv=0x00007ffeefbff700) at a.c:5:2
 let s:config['locate_pattern'] = {
       \ 'short': '^\s*frame #',

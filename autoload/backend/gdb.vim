@@ -11,11 +11,8 @@ let s:config['print_cmd'] = 'p'
 
 let s:file = expand('<sfile>')
 let s:dir = fnamemodify(s:file, ':h')
-if has('win32')
-  let s:config['init_cmds'] = 'source ' . s:dir . '\scripts\gdbinit'
-else
-  let s:config['init_cmds'] = 'source ' . s:dir . '/scripts/gdbinit'
-endif
+" TODO: Windows
+let s:config['init_cmds'] = 'source ' . s:dir . '/scripts/gdbinit'
 
 " Temporary breakpoint 2, main () at /home/eph/cpp-cmake/src/main.cpp:5
 " Breakpoint 1, main () at /home/eph/cpp-cmake/src/main.cpp:6
