@@ -151,6 +151,8 @@ function termdbg#StartDebug(bang, type, mods, ...) abort
     let config = backend#dlv#Get()
   elseif type ==# 'lldb'
     let config = backend#lldb#Get()
+  elseif type ==# 'gdb'
+    let config = backend#gdb#Get()
   else
     echoerr 'unknown dbg type' type
     return
@@ -163,6 +165,18 @@ function termdbg#StartDebug(bang, type, mods, ...) abort
     autocmd BufRead * call s:BufRead()
     autocmd BufUnload * call s:BufUnloaded()
   augroup END
+
+  " 运行初始化命令, 一般用来导入用于此插件的脚本
+  if has_key(s:config, 'init_cmds')
+    echomsg string(s:config.init_cmds)
+    if type(s:config.init_cmds) == type('')
+      call s:SendCommand(s:config.init_cmds)
+    elseif type(s:config.init_cmds) == type([])
+      for cmd in s:config.init_cmds
+        call s:SendCommand(cmd)
+      endfor
+    endif
+  endif
 
   " 初始跳到调试窗口，以方便输入命令，然而，回调会重定位光标
   call win_gotoid(s:ptybuf)

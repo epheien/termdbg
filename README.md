@@ -1,8 +1,8 @@
 # termdbg
 
-Termdbg is a terminal debugger plugin for vim 8.1+ and neovim 0.3.6+.  
-Currently, termdbg supports pdb, ipdb, lldb, dlv(go Delve).  
-If you need gdb support, try termdebug (`:h termdebug`)
+Termdbg is a terminal debugger plugin for vim 8.1+ and neovim 0.3.6+.
+Currently, termdbg supports pdb, ipdb, lldb, dlv(go Delve), gdb.
+If you need advanced gdb support, try termdebug (`:h termdebug`)
 
 Currently, termdbg just only do these things:
 - locate cursor to current runing line when debugger

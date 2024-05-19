@@ -30,12 +30,14 @@ let s:config['locate_pattern'] = {
       \ 'index': [1, 2],
       \ }
 
+" index: [breaknum, file, line]
 let s:config['new_breakpoint_pattern'] = {
       \ 'short': '^Breakpoint \d\+ at ',
       \ 'long': '^Breakpoint \(\d\+\) at \(.\+\):\(\d\+\)',
       \ 'index': [1, 2, 3],
       \ }
 
+" index: [breaknum, file, line]
 let s:config['del_breakpoint_pattern'] = {
       \ 'short': '^Deleted breakpoint \d\+ at ',
       \ 'long': '^Deleted breakpoint \(\d\+\) at \(.\+\):\(\d\+\)',
