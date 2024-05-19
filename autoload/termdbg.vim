@@ -212,13 +212,16 @@ function termdbg#on_stdout(job_id, msg)
     call filter(s:cache_lines, {idx, val -> idx >= len(s:cache_lines) - 100})
   endif
 
+  let located = v:false " 仅允许定位一次
   " 无脑逐行匹配动作！
   for line in reverse(lines)
     call s:dbg(line)
     if line =~# s:config.locate_pattern.short
       " 光标定位
-      if !termdbg#LocateCursor(line)
+      if !located && !termdbg#LocateCursor(line)
         execute 'sign unplace' s:pc_id
+      else
+        let located = v:true
       endif
     elseif line =~# s:config.new_breakpoint_pattern.short
       call s:HandleNewBreakpoint(line)
@@ -380,8 +383,10 @@ function s:RefreshScrolloff()
   endif
 endfunction
 
+let s:last_feedkeys_reltime = reltime()
 " 返回 0 表示定位失败，否则表示定位成功
 func termdbg#LocateCursor(msg)
+  " TODO: 避免重复检查
   if a:msg !~# s:config.locate_pattern.short
     return 0
   endif
@@ -407,6 +412,9 @@ func termdbg#LocateCursor(msg)
     echoerr fname 'not found'
     return 0
   endif
+
+  let ei_bak = &eventignore
+  set eventignore=WinEnter,WinLeave
 
   call s:GotoStartwinOrCreateIt()
 
@@ -435,19 +443,25 @@ func termdbg#LocateCursor(msg)
   if has('nvim')
     call s:RefreshScrolloff()
   endif
-  let ei_bak = &eventignore
-  set eventignore=WinEnter " 暂时忽略重新进入终端的窗口事件
   call win_gotoid(wid)
   let &eventignore = ei_bak
-
-  " 自动进入插入模式, 用 startinsert 无效, 应该是 BUG
-  if has('nvim') && mode ==# 't'
-    call feedkeys('i', 'n')
-  endif
 
   " redraw 一下才能保证 scrolloff 的配置生效
   redraw
   let &scrolloff = bak_so
+
+  " 自动进入插入模式, 用 startinsert 无效, 应该是 BUG
+  if has('nvim') && mode ==# 't'
+    let prev = s:last_feedkeys_reltime
+    let curr = reltime()
+    let interval = reltimefloat(reltime(prev, curr))
+    " 用时间间隔粗略避免重复输入 i
+    if interval >= 0.1
+      call feedkeys('i', 'n')
+      let s:last_feedkeys_reltime = curr
+    endif
+  endif
+
   return 1
 endfunc
 
