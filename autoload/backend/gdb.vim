@@ -18,8 +18,10 @@ let s:config['init_cmds'] = 'source ' . s:dir . '/scripts/gdbinit'
 " Breakpoint 1, main () at /home/eph/cpp-cmake/src/main.cpp:6
 " #0  main () at /home/eph/cpp-cmake/src/main.cpp:5
 " std::thread::thread<main()::<lambda(int)>, int>(struct {...} &&) (this=0x7fffffffdfa0, __f=...) at /usr/include/c++/11/bits/std_thread.h:127
+" 也就是路径过长换行了
+"     at /home/eph/.conan/data/xxxxx/1.1.4/_/_/build/31474e57b781878f04314a02557931e9b6a8891c/client/src/client.cc:309
 let s:config['locate_pattern'] = {
-      \ 'short': '^#\d\+ \|^Temporary breakpoint \d\+,\|^Breakpoint \d\+,\|\v\) at ([^:]+):(\d+)$',
+      \ 'short': '^#\d\+ \|^Temporary breakpoint \d\+,\|^Breakpoint \d\+,\|^    at \|\v\) at ([^:]+):(\d+)$',
       \ 'long': '\v.+ at ([^:]+):(\d+)$',
       \ 'index': [1, 2],
       \ }
