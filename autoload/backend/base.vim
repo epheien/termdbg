@@ -21,6 +21,11 @@ let s:config['clear_cmd'] = 'clear'
 let s:config['bt_cmd'] = 'bt'
 let s:config['print_cmd'] = 'p'
 
+function! s:init_argv(argv) abort
+  return a:argv
+endfunction
+let s:config['init_argv'] = function('s:init_argv')
+
 " 用于快速判断输出的类型是否为定位字符串, 以提高性能
 " 提取定位的模式, 第一个子匹配为文件, 第二个子匹配为行号
 " 文件名, 行号匹配组ID

@@ -100,13 +100,38 @@ function termdbg#StartDebug(bang, type, mods, ...) abort
     return
   endif
 
-  let s:startwin = win_getid(winnr())
-  let s:startsigncolumn = &signcolumn
-
   let argv = copy(a:000)
   " 使用 shell 来运行调试器的话，可以避免一些奇怪问题，主要是环境变量问题
   if g:termdbg_use_shell
     let argv = [&shell, &shellcmdflag] + [join(map(argv, {idx, val -> shellescape(val)}), ' ')]
+  endif
+
+  let type = a:type
+  if type == ''
+    " 直接取命令名称作为类型
+    let type = fnamemodify(argv[0], ':t')
+  endif
+
+  if type ==# 'ipdb' || type ==# 'ipdb3'
+    let config = backend#ipdb#Get()
+  elseif type ==# 'pdb' || type ==# 'pdb3'
+    let config = backend#pdb#Get()
+  elseif type ==# 'dlv'
+    let config = backend#dlv#Get()
+  elseif type ==# 'lldb'
+    let config = backend#lldb#Get()
+  elseif type ==# 'gdb'
+    let config = backend#gdb#Get()
+  else
+    echoerr 'unknown dbg type' type
+    return
+  endif
+
+  let s:startwin = win_getid(winnr())
+  let s:startsigncolumn = &signcolumn
+
+  if has_key(config, 'init_argv')
+    let argv = config.init_argv(argv)
   endif
 
   exec a:mods "new 'Terminal debugger'"
@@ -142,27 +167,6 @@ function termdbg#StartDebug(bang, type, mods, ...) abort
   " Sign used to indicate a breakpoint.
   " Can be used multiple times.
   sign define TermdbgBreak text=o texthl=TermdbgBreak
-
-  let type = a:type
-  if type == ''
-    " 直接取命令名称作为类型
-    let type = fnamemodify(argv[0], ':t')
-  endif
-
-  if type ==# 'ipdb' || type ==# 'ipdb3'
-    let config = backend#ipdb#Get()
-  elseif type ==# 'pdb' || type ==# 'pdb3'
-    let config = backend#pdb#Get()
-  elseif type ==# 'dlv'
-    let config = backend#dlv#Get()
-  elseif type ==# 'lldb'
-    let config = backend#lldb#Get()
-  elseif type ==# 'gdb'
-    let config = backend#gdb#Get()
-  else
-    echoerr 'unknown dbg type' type
-    return
-  endif
 
   let s:prompt = config['prompt']
   let s:config = config

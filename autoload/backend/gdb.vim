@@ -12,7 +12,14 @@ let s:config['print_cmd'] = 'p'
 let s:file = expand('<sfile>')
 let s:dir = fnamemodify(s:file, ':h')
 " TODO: Windows
-let s:config['init_cmds'] = 'source ' . s:dir . '/scripts/gdbinit'
+"let s:config['init_cmds'] = 'source ' . s:dir . '/scripts/gdbinit'
+
+function! s:init_argv(argv) abort
+  let argv = a:argv
+  return [argv[0], '-x', s:dir . '/scripts/gdbinit'] + argv[1:]
+endfunction
+
+let s:config['init_argv'] = function('s:init_argv')
 
 " Temporary breakpoint 2, main () at /home/eph/cpp-cmake/src/main.cpp:5
 " Breakpoint 1, main () at /home/eph/cpp-cmake/src/main.cpp:6
