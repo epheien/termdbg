@@ -11,7 +11,7 @@ Currently, termdbg supports
 If you need advanced gdb support, try termdebug (`:h termdebug`)
 
 Currently, termdbg just only do these things:
-- locate cursor to current running line when debugger
+- locate cursor to current running line when debugging
 - simply toggle breakpoints in buffer
 
 ## Install
