@@ -11,10 +11,10 @@ if !has('nvim') && !has('terminal')
   finish
 endif
 
-if exists('s:loaded')
+if exists('g:loaded_termdbg')
   finish
 endif
-let s:loaded = 1
+let g:loaded_termdbg = 1
 
 command -nargs=* -complete=file -bang Termdbg call termdbg#StartDebug(<bang>0, '', <q-mods>, <f-args>)
 
