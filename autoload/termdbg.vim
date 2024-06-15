@@ -114,15 +114,15 @@ function termdbg#StartDebug(bang, type, mods, ...) abort
   endif
 
   if type ==# 'ipdb' || type ==# 'ipdb3'
-    let config = backend#ipdb#Get()
+    let config = termdbg#backend#ipdb#Get()
   elseif type ==# 'pdb' || type ==# 'pdb3'
-    let config = backend#pdb#Get()
+    let config = termdbg#backend#pdb#Get()
   elseif type ==# 'dlv'
-    let config = backend#dlv#Get()
+    let config = termdbg#backend#dlv#Get()
   elseif type ==# 'lldb'
-    let config = backend#lldb#Get()
+    let config = termdbg#backend#lldb#Get()
   elseif type ==# 'gdb'
-    let config = backend#gdb#Get()
+    let config = termdbg#backend#gdb#Get()
   else
     echoerr 'unknown dbg type' type
     return

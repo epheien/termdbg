@@ -9,7 +9,7 @@
 "   - new breakpoint pattern
 "   - del breakpoint pattern
 
-let s:config = backend#base#Get()
+let s:config = termdbg#backend#base#Get()
 let s:config['prompt'] = '(dlv) '
 let s:config['trim_ansi_escape'] = v:true
 let s:config['next_cmd'] = 'next'
@@ -42,7 +42,7 @@ let s:config['del_breakpoint_pattern'] = {
       \ 'index': [1, 2, 3],
       \ }
 
-func backend#dlv#Get()
+func termdbg#backend#dlv#Get()
   return s:config
 endfunc
 

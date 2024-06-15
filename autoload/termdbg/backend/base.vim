@@ -49,7 +49,7 @@ let s:config['del_breakpoint_pattern'] = {
       \ 'index': [1, 2, 3],
       \ }
 
-func backend#base#Get()
+func termdbg#backend#base#Get()
   return deepcopy(s:config)
 endfunc
 

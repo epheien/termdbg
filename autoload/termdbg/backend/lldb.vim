@@ -1,4 +1,4 @@
-let s:config = backend#base#Get()
+let s:config = termdbg#backend#base#Get()
 let s:config['prompt'] = '(lldb) '
 let s:config['trim_ansi_escape'] = v:true
 let s:config['next_cmd'] = 'next'
@@ -71,7 +71,7 @@ let s:config['del_breakpoint_pattern'] = {
       \ 'index': [1],
       \ }
 
-func backend#lldb#Get()
+func termdbg#backend#lldb#Get()
   return s:config
 endfunc
 
