@@ -20,6 +20,33 @@ let s:ptybuf = 0 " 调试器缓冲区号
 let s:dbgwin = 0
 let s:config = {}
 
+let s:pc_id = 1002
+let s:break_id = 1010
+let s:winbar_winids = []
+let s:cache_lines = []
+let s:recent_lines = []
+" for debug
+let termdbg#cache_lines = s:cache_lines
+let s:prompt = '(Pdb) '
+" {bpnr: {lnum: ..., file: ...}, ...}
+let s:breakpoints = {}
+
+hi default link TermdbgCursor Identifier
+hi default link TermdbgBreak Special
+
+function! s:InitVariable(var, value, ...)
+  let force = a:0 > 0 ? a:1 : 0
+  if force || !exists(a:var)
+    if exists(a:var)
+      unlet {a:var}
+    endif
+    let {a:var} = a:value
+  endif
+endfunction
+
+" 启动时是否使用 shell
+call s:InitVariable('g:termdbg_use_shell', 0)
+
 func! s:splitdrive(p)
   if a:p[1:1] ==# ':'
     return [a:p[0:1], a:p[2:]]
@@ -56,32 +83,6 @@ func! s:GetCmdOutput(sCmd)
 
     return sOutput
 endfunc
-
-let s:pc_id = 1002
-let s:break_id = 1010
-let s:winbar_winids = []
-let s:cache_lines = []
-" for debug
-let termdbg#cache_lines = s:cache_lines
-let s:prompt = '(Pdb) '
-" {bpnr: {lnum: ..., file: ...}, ...}
-let s:breakpoints = {}
-
-hi default link TermdbgCursor Identifier
-hi default link TermdbgBreak Special
-
-function! s:InitVariable(var, value, ...)
-  let force = a:0 > 0 ? a:1 : 0
-  if force || !exists(a:var)
-    if exists(a:var)
-      unlet {a:var}
-    endif
-    let {a:var} = a:value
-  endif
-endfunction
-
-" 启动时是否使用 shell
-call s:InitVariable('g:termdbg_use_shell', 0)
 
 " (bang, type, *argv)
 function termdbg#StartDebug(bang, type, mods, ...) abort
