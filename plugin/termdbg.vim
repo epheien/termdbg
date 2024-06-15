@@ -16,11 +16,19 @@ if exists('g:loaded_termdbg')
 endif
 let g:loaded_termdbg = 1
 
-command -nargs=* -complete=file -bang Termdbg call termdbg#StartDebug(<bang>0, '', <q-mods>, <f-args>)
+"command -nargs=* -complete=file -bang Termdbg call termdbg#StartDebug(<bang>0, '', <q-mods>, <f-args>)
+command -nargs=* -complete=customlist,s:TermdbgComplete -bang Termdbg call termdbg#StartDebug(<bang>0, '', <q-mods>, <f-args>)
 
-"func TermdbgComplete(argLead, cmdLine, cursorPos)
-"  echomsg string(a:argLead) string(a:cmdLine) string(a:cursorPos)
-"  return join(['pdb', 'pdb3', 'ipdb', 'ipdb3', 'dlv', 'gdb', 'lldb'], "\n")
-"endfunc
+func s:TermdbgComplete(ArgLead, CmdLine, CursorPos) abort
+  let debuggers = ['pdb', 'pdb3', 'ipdb', 'ipdb3', 'dlv', 'gdb', 'lldb']
+
+  if a:CmdLine =~ '^\w\+\s\+\w*$'
+    " 如果命令行只有一个参数,使用 debuggers 列表进行补全
+    return filter(copy(debuggers), 'v:val =~ "^" . a:ArgLead')
+  else
+    " 对于其他参数,使用文件补全
+    return glob(a:ArgLead . '*', 0, 1)
+  endif
+endfunc
 
 " vim:sts=2:sw=2:et:
