@@ -232,14 +232,27 @@ function termdbg#on_stdout(job_id, msg)
     call filter(lines, '!empty(v:val)')
   endif
 
+  if empty(lines)
+    return
+  endif
+
   call extend(s:cache_lines, lines)
   if len(s:cache_lines) > 100
     call filter(s:cache_lines, {idx, val -> idx >= len(s:cache_lines) - 100})
   endif
+  call extend(s:recent_lines, lines)
+  if len(s:recent_lines) > 100
+    call filter(s:recent_lines, {idx, val -> idx >= len(s:recent_lines) - 100})
+  endif
+
+  " 看到 prompt 之前不匹配
+  if s:recent_lines[-1] !=# s:prompt
+    return
+  endif
 
   let located = v:false " 仅允许定位一次
   " 无脑逐行匹配动作！
-  for line in reverse(copy(lines))
+  for line in reverse(s:recent_lines)
     call s:dbg(line)
     if line =~# s:config.locate_pattern.short
       " 光标定位
@@ -254,6 +267,7 @@ function termdbg#on_stdout(job_id, msg)
       call s:HandleDelBreakpoint(line)
     endif
   endfor
+  call filter(s:recent_lines, 0)
 endfunction
 
 " Breakpoint 1 at /Users/eph/a.py:16
@@ -327,6 +341,7 @@ function s:on_exit(job_id, status)
   let s:ptybuf = 0
   let s:dbgwin = 0
   call filter(s:cache_lines, 0)
+  call filter(s:recent_lines, 0)
 
   let curwinid = win_getid(winnr())
 
