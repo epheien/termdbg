@@ -33,6 +33,25 @@ let s:config['locate_pattern'] = {
       \ 'index': [1, 2],
       \ }
 
+" params: (cmd, line, index, count)
+" return: (fname, lnum)
+function termdbg#backend#gdb#locate(cmd, line, index, count)
+  if index(['bt', 'backtrace', 'where'], a:cmd) >= 0
+    return ['', 0]
+  endif
+  if a:line !~# s:config.locate_pattern.short
+    return ['', 0]
+  endif
+  let pattern = s:config.locate_pattern.long
+  let index = s:config.locate_pattern.index
+  let matches = matchlist(a:line, pattern)
+  let fname = get(matches, index[0], '')
+  let lnum = str2nr(get(matches, index[1]))
+  return [fname, lnum]
+endfunction
+
+let s:config['locate_function'] = function('termdbg#backend#gdb#locate')
+
 " Breakpoint 2 at 0x555555560f5c: file /home/eph/cpp-cmake/src/main.cpp, line 5.
 let s:config['new_breakpoint_pattern'] = {
       \ 'short': '^Breakpoint \d\+ ',

@@ -213,7 +213,7 @@ endfunction
 " 因为绝大多数程序的标准输出是行缓冲的，所以一般情况下（手动输入除外），
 " msg 是成整行的，可能是多个整行
 " BUG: 虽然 msg 每次过来基本可以确定是整行的，但是行之间的顺序是不定的！
-function termdbg#on_stdout(job_id, msg)
+function termdbg#on_stdout(job_id, msg) abort
   if get(s:config, 'trim_ansi_escape')
     " 去除 ipdb 的转义字符
     let lines = split(s:TrimAnsiEscape(a:msg), "\r")
@@ -251,10 +251,27 @@ function termdbg#on_stdout(job_id, msg)
   endif
 
   let located = v:false " 仅允许定位一次
+  let [_, cmd] = termdbg#GetLastCommand()
+  let reverse_lines = reverse(copy(s:recent_lines))
+  call filter(s:recent_lines, 0)
+
   " 无脑逐行匹配动作！
-  for line in reverse(s:recent_lines)
+  for idx in range(len(reverse_lines))
+    let line = reverse_lines[idx]
     call s:dbg(line)
-    if line =~# s:config.locate_pattern.short
+
+    if has_key(s:config, 'locate_function') && !located
+      let [fname, lnum] = s:config.locate_function(cmd, line, idx, len(reverse_lines))
+      if !empty(fname)
+        if !termdbg#LocateCursor(fname, lnum)
+          execute 'sign unplace' s:pc_id
+        else
+          let located = v:true
+        endif
+      endif
+    endif
+
+    if !has_key(s:config, 'locate_function') && line =~# s:config.locate_pattern.short
       " 光标定位
       if !located && !termdbg#MatchLocateCursor(line)
         execute 'sign unplace' s:pc_id
@@ -267,7 +284,6 @@ function termdbg#on_stdout(job_id, msg)
       call s:HandleDelBreakpoint(line)
     endif
   endfor
-  call filter(s:recent_lines, 0)
 endfunction
 
 " Breakpoint 1 at /Users/eph/a.py:16
