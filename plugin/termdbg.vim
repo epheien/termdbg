@@ -27,7 +27,8 @@ func s:TermdbgComplete(ArgLead, CmdLine, CursorPos) abort
     return filter(copy(debuggers), 'v:val =~ "^" . a:ArgLead')
   else
     " 对于其他参数,使用文件补全
-    return map(glob(a:ArgLead . '*', 0, 1), {key, val -> isdirectory(val) ? val . '/' : val})
+    "return map(glob(a:ArgLead . '*', 0, 1), {key, val -> isdirectory(val) ? val . '/' : val})
+    return getcompletion(a:ArgLead, 'file')
   endif
 endfunc
 
