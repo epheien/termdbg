@@ -84,6 +84,17 @@ func! s:GetCmdOutput(sCmd)
     return sOutput
 endfunc
 
+function s:ExpandArgv(argv) abort
+  let argv = a:argv
+  for i in range(1, len(argv)-1)
+    " TODO: 支持更多的可 expand() 的特殊字符
+    if argv[i] == '%'
+      let argv[i] = expand(argv[i])
+    endif
+  endfor
+  return argv
+endfunc
+
 " (bang, type, *argv)
 function termdbg#StartDebug(bang, type, mods, ...) abort
   if s:dbgwin > 0
@@ -102,6 +113,7 @@ function termdbg#StartDebug(bang, type, mods, ...) abort
   endif
 
   let argv = copy(a:000)
+  call s:ExpandArgv(argv)
   " 使用 shell 来运行调试器的话，可以避免一些奇怪问题，主要是环境变量问题
   if g:termdbg_use_shell
     let argv = [&shell, &shellcmdflag] + [join(map(argv, {idx, val -> shellescape(val)}), ' ')]
