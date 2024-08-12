@@ -205,9 +205,9 @@ function termdbg#StartDebug(bang, type, mods, ...) abort
 endfunction
 
 " 从缓存的输出中寻找最近运行的命令
-function termdbg#GetLastCommand()
+function termdbg#GetLastCommand(end_lnum)
   let length = len(s:prompt)
-  for lnum in range(line('$', s:dbgwin), 1, -1)
+  for lnum in range(a:end_lnum, 1, -1)
     let line = getbufline(s:ptybuf, lnum)[0]
     if line =~# '\V\^' . s:prompt . '\.\+\$'
       let cmd = trim(line[length:])
@@ -263,7 +263,7 @@ function termdbg#on_stdout(job_id, msg) abort
   endif
 
   let located = v:false " 仅允许定位一次
-  let [_, cmd] = termdbg#GetLastCommand()
+  let [_, cmd] = termdbg#GetLastCommand(s:getbufmaxline(s:ptybuf))
   let reverse_lines = reverse(copy(s:recent_lines))
   call filter(s:recent_lines, 0)
 
@@ -554,20 +554,13 @@ function s:LocateCursor()
     return
   endif
 
-  if has_key(s:config, 'locate_function')
-    return s:config.locate_function(s:ptybuf, s:dbgwin)
-  endif
-
   let maxlnum = s:getbufmaxline(s:ptybuf)
   let min = 1
-  let pdb_cnt = 0
+  let prompt_cnt = 0
   for lnum in range(maxlnum, min, -1)
     let line = getbufline(s:ptybuf, lnum)[0]
     if line ==# s:prompt
-      let pdb_cnt += 1
-      "if pdb_cnt >= 2
-        "break
-      "endif
+      let prompt_cnt += 1
     endif
     if line !~# s:config.locate_pattern.short
       continue
