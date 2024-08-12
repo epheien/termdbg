@@ -549,7 +549,7 @@ func termdbg#MatchLocateCursor(msg)
   endfor
 endfunc
 
-function s:LocateCursor()
+function s:LocateCursor() abort
   if s:ptybuf <= 0
     return
   endif
@@ -562,6 +562,20 @@ function s:LocateCursor()
     if line ==# s:prompt
       let prompt_cnt += 1
     endif
+
+    if has_key(s:config, 'locate_function')
+      let cmd = termdbg#GetLastCommand(lnum)
+      let [fname, lnum] = s:config.locate_function(cmd, line, lnum-1, maxlnum)
+      if !empty(fname)
+        if !termdbg#LocateCursor(fname, lnum)
+          execute 'sign unplace' s:pc_id
+        else
+          break
+        endif
+      endif
+      continue " bypass
+    endif
+
     if line !~# s:config.locate_pattern.short
       continue
     endif
