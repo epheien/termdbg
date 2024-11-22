@@ -32,7 +32,7 @@ let s:config['locate_pattern'] = {
 
 " 定位函数, 用于 TLocateCursor 命令, 兜底定位代码
 function termdbg#backend#lldb#locate(cmd, line, index, count) abort
-  if a:cmd[1] ==# 'bt'
+  if a:cmd ==# 'bt'
     let matches = matchlist(a:line, '\v^  \* frame #\d+: .+ at ([^:]+):(\d+):\d+')
   else
     let matches = matchlist(a:line, s:config['locate_pattern']['long'])

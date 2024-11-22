@@ -569,7 +569,7 @@ function s:LocateCursor() abort
     endif
 
     if has_key(s:config, 'locate_function')
-      let cmd = termdbg#GetLastCommand(lnum)
+      let [_, cmd] = termdbg#GetLastCommand(lnum)
       let [fname, lnum] = s:config.locate_function(cmd, line, lnum-1, maxlnum)
       if !empty(fname)
         if !termdbg#LocateCursor(fname, lnum)
