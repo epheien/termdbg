@@ -27,6 +27,7 @@ let s:cache_lines = []
 let s:recent_lines = []
 " for debug
 let termdbg#cache_lines = s:cache_lines
+let termdbg#recent_lines = s:recent_lines
 let s:prompt = '(Pdb) '
 " {bpnr: {lnum: ..., file: ...}, ...}
 let s:breakpoints = {}
@@ -258,7 +259,11 @@ function termdbg#on_stdout(job_id, msg) abort
   endif
 
   " 看到 prompt 之前不匹配
-  if s:recent_lines[-1] !=# s:prompt
+  if !empty(get(s:config, 'prompt_pattern'))
+    if s:recent_lines[-1] !~# s:config.prompt_pattern
+      return
+    endif
+  elseif s:recent_lines[-1] !=# s:prompt
     return
   endif
 

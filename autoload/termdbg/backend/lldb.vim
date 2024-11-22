@@ -1,5 +1,6 @@
 let s:config = termdbg#backend#base#Get()
 let s:config['prompt'] = '(lldb) '
+let s:config['prompt_pattern'] = '^\((lldb) (lldb) \|(lldb) \)$'
 let s:config['trim_ansi_escape'] = v:true
 let s:config['next_cmd'] = 'next'
 let s:config['step_cmd'] = 'step'
@@ -30,28 +31,18 @@ let s:config['locate_pattern'] = {
       \ }
 
 " 定位函数, 用于 TLocateCursor 命令, 兜底定位代码
-function s:config.locate_function(ptybuf, dbgwin, ...)
-  let [cmdlnum, cmd] = termdbg#GetLastCommand()
-  let argv = split(cmd)
-  if cmdlnum <= 0
-    return 0
+function termdbg#backend#lldb#locate(cmd, line, index, count) abort
+  if a:cmd[1] ==# 'bt'
+    let matches = matchlist(a:line, '\v^  \* frame #\d+: .+ at ([^:]+):(\d+):\d+')
+  else
+    let matches = matchlist(a:line, s:config['locate_pattern']['long'])
   endif
-  " 正向逐行匹配
-  for lnr in range(cmdlnum + 1, line('$', a:dbgwin))
-    let line = get(getbufline(a:ptybuf, lnr), 0, '')
-    if argv[0] ==# 'bt'
-      let matches = matchlist(line, '\v^  \* frame #\d+: .+ at ([^:]+):(\d+):\d+')
-    else
-      let matches = matchlist(line, s:config['locate_pattern']['long'])
-    endif
-    let fname = get(matches, 1, '')
-    let lnum = get(matches, 2)
-    if !empty(fname) && lnum > 0
-      return termdbg#LocateCursor(fname, lnum)
-    endif
-  endfor
-  return 0
+  let fname = get(matches, 1, '')
+  let lnum = get(matches, 2)
+  return [fname, lnum]
 endfunc
+
+let s:config['locate_function'] = function('termdbg#backend#lldb#locate')
 
 " Breakpoint 4: where = a.out`main + 22 at a.c:4:2, address = 0x0000000100000f66
 " Breakpoint 00 set at /Users/eph/wsp/cpp-cmake/src/main.cpp:6
