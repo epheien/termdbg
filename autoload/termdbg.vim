@@ -15,6 +15,8 @@ let s:loaded = 1
 let s:debug = v:false
 "let s:debug = v:true
 
+let g:termdbg_running = 0
+
 let s:job_id = 0
 let s:ptybuf = 0 " 调试器缓冲区号
 let s:dbgwin = 0
@@ -148,6 +150,7 @@ function termdbg#StartDebug(bang, type, mods, ...) abort
     let argv = config.init_argv(argv)
   endif
 
+  let g:termdbg_running = 1
   exec a:mods "new 'Terminal debugger'"
   if has('nvim')
     let callbacks = {
@@ -394,6 +397,7 @@ function s:on_exit(job_id, status)
   call filter(s:breakpoints, 0)
 
   autocmd! Termdbg
+  let g:termdbg_running = 0
 endfunction
 
 function s:getbufmaxline(bufnr)
