@@ -238,8 +238,8 @@ function termdbg#on_stdout(job_id, msg) abort
   endif
 
   for idx in range(len(lines))
-    " 去除 "^\n"
-    let lines[idx] = substitute(lines[idx], '^\n', '', '')
+    " 去除 "^\n" 和 "^H" 控制字符
+    let lines[idx] = substitute(lines[idx], '^\n\|\%x08', '', 'g')
   endfor
 
   " 去除 ipdb 中多余的空行输出

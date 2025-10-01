@@ -11,6 +11,7 @@
 
 let s:config = termdbg#backend#base#Get()
 let s:config['prompt'] = 'ipdb> '
+let s:config['prompt_pattern'] = '^ipdb>\|^ipdb>ipdb>'
 let s:config['trim_ansi_escape'] = v:true
 let s:config['next_cmd'] = 'next'
 let s:config['step_cmd'] = 'step'
