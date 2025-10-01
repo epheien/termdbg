@@ -22,7 +22,7 @@ command -nargs=* -complete=customlist,s:TermdbgComplete -bang Termdbg call termd
 func s:TermdbgComplete(ArgLead, CmdLine, CursorPos) abort
   let debuggers = ['pdb', 'pdb3', 'ipdb', 'ipdb3', 'dlv', 'gdb', 'lldb']
 
-  if a:CmdLine =~ '^\w\+\s\+\w*$'
+  if a:CmdLine =~ '^\s*\w\+\s\+\w*$'
     " 如果命令行只有一个参数,使用 debuggers 列表进行补全
     return filter(copy(debuggers), 'v:val =~ "^" . a:ArgLead')
   else

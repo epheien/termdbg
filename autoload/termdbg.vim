@@ -515,16 +515,16 @@ func termdbg#LocateCursor(fname, lnum)
   let &scrolloff = bak_so
 
   " 自动进入插入模式, 用 startinsert 无效, 应该是 BUG
-  if has('nvim') && mode ==# 't'
-    let prev = s:last_feedkeys_reltime
-    let curr = reltime()
-    let interval = reltimefloat(reltime(prev, curr))
-    " 用时间间隔粗略避免重复输入 i
-    if interval >= 0.1
-      call feedkeys('i', 'n')
-      let s:last_feedkeys_reltime = curr
-    endif
-  endif
+  "if has('nvim') && mode ==# 't'
+  "  let prev = s:last_feedkeys_reltime
+  "  let curr = reltime()
+  "  let interval = reltimefloat(reltime(prev, curr))
+  "  " 用时间间隔粗略避免重复输入 i
+  "  if interval >= 0.1
+  "    call feedkeys('i', 'n')
+  "    let s:last_feedkeys_reltime = curr
+  "  endif
+  "endif
 
   return 1
 endfunc
