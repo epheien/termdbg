@@ -54,4 +54,4 @@ None.
 
 ## Screenshots
 
-![termdbg](https://raw.githubusercontent.com/epheien/termdbg/master/screenshots/dlv.png)
+![termdbg](screenshots/dlv.png)
